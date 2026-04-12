@@ -52,495 +52,92 @@
             --danger: #dc2626;
         }
 
-        *,
-        *::before,
-        *::after {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            font-family: var(--font-body);
-            background: var(--bg);
-            color: var(--text);
-            min-height: 100dvh;
-        }
-
-        /* HEADER */
-        header {
-            background: var(--surface);
-            border-bottom: 1px solid var(--border);
-            padding: var(--space-4) var(--space-6);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: var(--space-3);
-            font-weight: 700;
-            font-size: var(--text-lg);
-        }
-
-        .logo-badge {
-            background: var(--danger);
-            color: white;
-            font-size: var(--text-xs);
-            padding: 2px 8px;
-            border-radius: var(--radius-full);
-            margin-left: var(--space-2);
-            font-weight: 600;
-        }
-
-        .header-right {
-            display: flex;
-            align-items: center;
-            gap: var(--space-3);
-        }
-
-        .live-dot {
-            width: 8px;
-            height: 8px;
-            background: var(--success);
-            border-radius: 50%;
-            animation: pulse 2s infinite;
-            display: inline-block;
-        }
-
-        @keyframes pulse {
-
-            0%,
-            100% {
-                opacity: 1
-            }
-
-            50% {
-                opacity: 0.4
-            }
-        }
-
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            gap: var(--space-2);
-            padding: var(--space-2) var(--space-4);
-            border-radius: var(--radius-md);
-            font-size: var(--text-sm);
-            font-weight: 600;
-            cursor: pointer;
-            border: none;
-            transition: all 180ms ease;
-        }
-
-        .btn-primary {
-            background: var(--accent);
-            color: white;
-        }
-
-        .btn-danger {
-            background: var(--danger);
-            color: white;
-        }
-
-        .btn-secondary {
-            background: var(--surface-2);
-            color: var(--text);
-            border: 1px solid var(--border);
-        }
-
-        .btn:hover {
-            opacity: 0.85;
-        }
-
-        .theme-btn {
-            background: var(--surface-2);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-full);
-            padding: var(--space-2) var(--space-3);
-            color: var(--text);
-            cursor: pointer;
-            font-size: var(--text-sm);
-        }
-
-        /* LAYOUT */
-        .layout {
-            display: grid;
-            grid-template-columns: 240px 1fr;
-            min-height: calc(100dvh - 65px);
-        }
-
-        /* SIDEBAR */
-        .sidebar {
-            background: var(--surface);
-            border-right: 1px solid var(--border);
-            padding: var(--space-6) var(--space-4);
-        }
-
-        .sidebar h3 {
-            font-size: var(--text-xs);
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            color: var(--muted);
-            margin-bottom: var(--space-4);
-        }
-
-        .nav-item {
-            display: flex;
-            align-items: center;
-            gap: var(--space-3);
-            padding: var(--space-3) var(--space-4);
-            border-radius: var(--radius-md);
-            font-size: var(--text-sm);
-            font-weight: 500;
-            cursor: pointer;
-            color: var(--muted);
-            transition: all 180ms ease;
-            margin-bottom: 2px;
-            background: none;
-            border: none;
-            width: 100%;
-            text-align: left;
-        }
-
-        .nav-item:hover {
-            background: var(--surface-2);
-            color: var(--text);
-        }
-
-        .nav-item.active {
-            background: oklch(from var(--accent) l c h / 0.12);
-            color: var(--accent);
-        }
-
-        .sidebar-divider {
-            border: none;
-            border-top: 1px solid var(--border);
-            margin: var(--space-4) 0;
-        }
-
-        /* MAIN CONTENT */
-        .content {
-            padding: var(--space-6);
-            overflow-y: auto;
-        }
-
-        .page {
-            display: none;
-        }
-
-        .page.active {
-            display: block;
-        }
-
-        /* KPI CARDS */
-        .kpi-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-            gap: var(--space-4);
-            margin-bottom: var(--space-6);
-        }
-
-        .kpi-card {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-xl);
-            padding: var(--space-4);
-        }
-
-        .kpi-label {
-            font-size: var(--text-xs);
-            color: var(--muted);
-            text-transform: uppercase;
-            letter-spacing: 0.06em;
-            margin-bottom: var(--space-2);
-        }
-
-        .kpi-value {
-            font-size: var(--text-xl);
-            font-weight: 700;
-            font-variant-numeric: tabular-nums;
-        }
-
-        .kpi-sub {
-            font-size: var(--text-xs);
-            color: var(--muted);
-            margin-top: 4px;
-        }
-
-        .kpi-green {
-            color: var(--success);
-        }
-
-        .kpi-yellow {
-            color: var(--warning);
-        }
-
-        .kpi-red {
-            color: var(--danger);
-        }
-
-        /* SECTION CARD */
-        .card {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-xl);
-            padding: var(--space-6);
-            margin-bottom: var(--space-6);
-        }
-
-        .card-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: var(--space-4);
-        }
-
-        .card-header h2 {
-            font-size: var(--text-base);
-            font-weight: 700;
-        }
-
-        /* HEATMAP GRID */
-        .heatmap {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: var(--space-3);
-        }
-
-        .zone-tile {
-            border-radius: var(--radius-lg);
-            padding: var(--space-4);
-            text-align: center;
-            cursor: pointer;
-            transition: transform 180ms ease;
-            border: 2px solid transparent;
-        }
-
-        .zone-tile:hover {
-            transform: scale(1.03);
-        }
-
-        .zone-tile.low {
-            background: oklch(from var(--success) l c h / 0.15);
-            border-color: oklch(from var(--success) l c h / 0.3);
-        }
-
-        .zone-tile.medium {
-            background: oklch(from var(--warning) l c h / 0.15);
-            border-color: oklch(from var(--warning) l c h / 0.3);
-        }
-
-        .zone-tile.high {
-            background: oklch(from var(--danger) l c h / 0.15);
-            border-color: oklch(from var(--danger) l c h / 0.3);
-        }
-
-        .zone-tile .zone-name {
-            font-size: var(--text-sm);
-            font-weight: 600;
-            margin-bottom: 4px;
-        }
-
-        .zone-tile .zone-level {
-            font-size: var(--text-xs);
-            color: var(--muted);
-        }
-
-        /* QUEUE TABLE */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        thead th {
-            font-size: var(--text-xs);
-            text-transform: uppercase;
-            letter-spacing: 0.06em;
-            color: var(--muted);
-            padding: var(--space-3) var(--space-4);
-            text-align: left;
-            border-bottom: 1px solid var(--border);
-        }
-
-        tbody td {
-            padding: var(--space-3) var(--space-4);
-            font-size: var(--text-sm);
-            border-bottom: 1px solid var(--border);
-            font-variant-numeric: tabular-nums;
-        }
-
-        tbody tr:last-child td {
-            border-bottom: none;
-        }
-
-        tbody tr:hover td {
-            background: var(--surface-2);
-        }
-
-        /* BADGE */
-        .badge {
-            display: inline-flex;
-            align-items: center;
-            padding: 2px 10px;
-            border-radius: var(--radius-full);
-            font-size: var(--text-xs);
-            font-weight: 600;
-        }
-
-        .badge-low {
-            background: oklch(from var(--success) l c h / 0.15);
-            color: var(--success);
-        }
-
-        .badge-medium {
-            background: oklch(from var(--warning) l c h / 0.15);
-            color: var(--warning);
-        }
-
-        .badge-high {
-            background: oklch(from var(--danger) l c h / 0.15);
-            color: var(--danger);
-        }
-
-        /* ANNOUNCE PANEL */
-        .announce-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: var(--space-4);
-        }
-
-        .preset-btn {
-            background: var(--surface-2);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-lg);
-            padding: var(--space-4);
-            cursor: pointer;
-            text-align: left;
-            transition: all 180ms ease;
-            font-family: var(--font-body);
-            color: var(--text);
-        }
-
-        .preset-btn:hover {
-            border-color: var(--accent);
-            background: oklch(from var(--accent) l c h / 0.08);
-        }
-
-        .preset-btn .preset-title {
-            font-size: var(--text-sm);
-            font-weight: 600;
-            margin-bottom: 4px;
-        }
-
-        .preset-btn .preset-msg {
-            font-size: var(--text-xs);
-            color: var(--muted);
-        }
-
-        .custom-announce {
-            margin-top: var(--space-4);
-        }
-
-        .announce-input {
-            width: 100%;
-            padding: var(--space-3) var(--space-4);
-            background: var(--surface-2);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-md);
-            color: var(--text);
-            font-family: var(--font-body);
-            font-size: var(--text-sm);
-            margin-bottom: var(--space-3);
-            resize: vertical;
-            min-height: 80px;
-        }
-
-        .announce-input:focus {
-            outline: 2px solid var(--accent);
-            outline-offset: 2px;
-        }
-
-        /* ALERT LOG */
-        .alert-item {
-            display: flex;
-            align-items: flex-start;
-            gap: var(--space-3);
-            padding: var(--space-3) 0;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .alert-item:last-child {
-            border-bottom: none;
-        }
-
-        .alert-icon {
-            font-size: 1.2rem;
-            flex-shrink: 0;
-        }
-
-        .alert-body {
-            flex: 1;
-        }
-
-        .alert-title {
-            font-size: var(--text-sm);
-            font-weight: 600;
-        }
-
-        .alert-time {
-            font-size: var(--text-xs);
-            color: var(--muted);
-        }
-
-        /* TOAST */
-        .toast {
-            position: fixed;
-            bottom: var(--space-6);
-            right: var(--space-6);
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-lg);
-            padding: var(--space-4) var(--space-6);
-            font-size: var(--text-sm);
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-            transform: translateY(120%);
-            transition: transform 300ms ease;
-            z-index: 999;
-            max-width: 320px;
-        }
-
-        .toast.show {
-            transform: translateY(0);
-        }
-
-        @media (max-width: 768px) {
-            .layout {
-                grid-template-columns: 1fr;
-            }
-
-            .sidebar {
-                display: none;
-            }
-
-            .heatmap {
-                grid-template-columns: repeat(2, 1fr);
-            }
-
-            .announce-grid {
-                grid-template-columns: 1fr;
-            }
-        }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: var(--font-body); background: var(--bg); color: var(--text); min-height: 100dvh; }
+
+        header { background: var(--surface); border-bottom: 1px solid var(--border); padding: var(--space-4) var(--space-6); display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+        .logo { display: flex; align-items: center; gap: var(--space-3); font-weight: 700; font-size: var(--text-lg); }
+        .logo-badge { background: var(--danger); color: white; font-size: var(--text-xs); padding: 2px 8px; border-radius: var(--radius-full); margin-left: var(--space-2); font-weight: 600; }
+        .header-right { display: flex; align-items: center; gap: var(--space-3); }
+        .live-dot { width: 8px; height: 8px; background: var(--success); border-radius: 50%; animation: pulse 2s infinite; display: inline-block; }
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+        .btn { display: inline-flex; align-items: center; gap: var(--space-2); padding: var(--space-2) var(--space-4); border-radius: var(--radius-md); font-size: var(--text-sm); font-weight: 600; cursor: pointer; border: none; transition: all 180ms ease; }
+        .btn-primary { background: var(--accent); color: white; }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-secondary { background: var(--surface-2); color: var(--text); border: 1px solid var(--border); }
+        .btn:hover { opacity: 0.85; }
+        .theme-btn { background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-full); padding: var(--space-2) var(--space-3); color: var(--text); cursor: pointer; font-size: var(--text-sm); }
+
+        .layout { display: grid; grid-template-columns: 240px 1fr; min-height: calc(100dvh - 65px); }
+        .sidebar { background: var(--surface); border-right: 1px solid var(--border); padding: var(--space-6) var(--space-4); }
+        .sidebar h3 { font-size: var(--text-xs); text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: var(--space-4); }
+        .nav-item { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3) var(--space-4); border-radius: var(--radius-md); font-size: var(--text-sm); font-weight: 500; cursor: pointer; color: var(--muted); transition: all 180ms ease; margin-bottom: 2px; background: none; border: none; width: 100%; text-align: left; }
+        .nav-item:hover { background: var(--surface-2); color: var(--text); }
+        .nav-item.active { background: oklch(from var(--accent) l c h / 0.12); color: var(--accent); }
+        .sidebar-divider { border: none; border-top: 1px solid var(--border); margin: var(--space-4) 0; }
+
+        .content { padding: var(--space-6); overflow-y: auto; }
+        .page { display: none; }
+        .page.active { display: block; }
+
+        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: var(--space-4); margin-bottom: var(--space-6); }
+        .kpi-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-xl); padding: var(--space-4); }
+        .kpi-label { font-size: var(--text-xs); color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: var(--space-2); }
+        .kpi-value { font-size: var(--text-xl); font-weight: 700; font-variant-numeric: tabular-nums; }
+        .kpi-sub { font-size: var(--text-xs); color: var(--muted); margin-top: 4px; }
+        .kpi-green { color: var(--success); }
+        .kpi-yellow { color: var(--warning); }
+        .kpi-red { color: var(--danger); }
+
+        .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-xl); padding: var(--space-6); margin-bottom: var(--space-6); }
+        .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-4); }
+        .card-header h2 { font-size: var(--text-base); font-weight: 700; }
+
+        .heatmap { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-3); }
+        .zone-tile { border-radius: var(--radius-lg); padding: var(--space-4); text-align: center; cursor: pointer; transition: transform 180ms ease; border: 2px solid transparent; }
+        .zone-tile:hover { transform: scale(1.03); }
+        .zone-tile.low { background: oklch(from var(--success) l c h / 0.15); border-color: oklch(from var(--success) l c h / 0.3); }
+        .zone-tile.medium { background: oklch(from var(--warning) l c h / 0.15); border-color: oklch(from var(--warning) l c h / 0.3); }
+        .zone-tile.high { background: oklch(from var(--danger) l c h / 0.15); border-color: oklch(from var(--danger) l c h / 0.3); }
+        .zone-tile .zone-name { font-size: var(--text-sm); font-weight: 600; margin-bottom: 4px; }
+        .zone-tile .zone-level { font-size: var(--text-xs); color: var(--muted); }
+
+        table { width: 100%; border-collapse: collapse; }
+        thead th { font-size: var(--text-xs); text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); padding: var(--space-3) var(--space-4); text-align: left; border-bottom: 1px solid var(--border); }
+        tbody td { padding: var(--space-3) var(--space-4); font-size: var(--text-sm); border-bottom: 1px solid var(--border); font-variant-numeric: tabular-nums; }
+        tbody tr:last-child td { border-bottom: none; }
+        tbody tr:hover td { background: var(--surface-2); }
+
+        .badge { display: inline-flex; align-items: center; padding: 2px 10px; border-radius: var(--radius-full); font-size: var(--text-xs); font-weight: 600; }
+        .badge-low { background: oklch(from var(--success) l c h / 0.15); color: var(--success); }
+        .badge-medium { background: oklch(from var(--warning) l c h / 0.15); color: var(--warning); }
+        .badge-high { background: oklch(from var(--danger) l c h / 0.15); color: var(--danger); }
+
+        .announce-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); }
+        .preset-btn { background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: var(--space-4); cursor: pointer; text-align: left; transition: all 180ms ease; font-family: var(--font-body); color: var(--text); }
+        .preset-btn:hover { border-color: var(--accent); background: oklch(from var(--accent) l c h / 0.08); }
+        .preset-btn .preset-title { font-size: var(--text-sm); font-weight: 600; margin-bottom: 4px; }
+        .preset-btn .preset-msg { font-size: var(--text-xs); color: var(--muted); }
+        .custom-announce { margin-top: var(--space-4); }
+        .announce-input { width: 100%; padding: var(--space-3) var(--space-4); background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-md); color: var(--text); font-family: var(--font-body); font-size: var(--text-sm); margin-bottom: var(--space-3); resize: vertical; min-height: 80px; }
+        .announce-input:focus { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+        .alert-item { display: flex; align-items: flex-start; gap: var(--space-3); padding: var(--space-3) 0; border-bottom: 1px solid var(--border); }
+        .alert-item:last-child { border-bottom: none; }
+        .alert-icon { font-size: 1.2rem; flex-shrink: 0; }
+        .alert-body { flex: 1; }
+        .alert-title { font-size: var(--text-sm); font-weight: 600; }
+        .alert-time { font-size: var(--text-xs); color: var(--muted); }
+
+        .toast { position: fixed; bottom: var(--space-6); right: var(--space-6); background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: var(--space-4) var(--space-6); font-size: var(--text-sm); box-shadow: 0 8px 24px rgba(0,0,0,0.3); transform: translateY(120%); transition: transform 300ms ease; z-index: 999; max-width: 320px; }
+        .toast.show { transform: translateY(0); }
+
+        @media (max-width: 768px) { .layout { grid-template-columns: 1fr; } .sidebar { display: none; } .heatmap { grid-template-columns: repeat(2, 1fr); } .announce-grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 
 <body>
-
     <header>
         <div class="logo">
             <svg width="26" height="26" viewBox="0 0 28 28" fill="none" aria-label="StadiumFlow">
@@ -561,11 +158,11 @@
     <div class="layout">
         <aside class="sidebar">
             <h3>Control Center</h3>
-            <button class="nav-item active" onclick="showPage('overview')">📊 Overview</button>
-            <button class="nav-item" onclick="showPage('heatmap')">🗺️ Zone Heatmap</button>
-            <button class="nav-item" onclick="showPage('queues')">⏱ Queue Monitor</button>
-            <button class="nav-item" onclick="showPage('announce')">📢 Announcements</button>
-            <button class="nav-item" onclick="showPage('alerts')">🚨 Alert Log</button>
+            <button class="nav-item active" onclick="showPage('overview', event)">📊 Overview</button>
+            <button class="nav-item" onclick="showPage('heatmap', event)">🗺️ Zone Heatmap</button>
+            <button class="nav-item" onclick="showPage('queues', event)">⏱ Queue Monitor</button>
+            <button class="nav-item" onclick="showPage('announce', event)">📢 Announcements</button>
+            <button class="nav-item" onclick="showPage('alerts', event)">🚨 Alert Log</button>
             <hr class="sidebar-divider" />
             <h3>Quick Actions</h3>
             <button class="nav-item" onclick="triggerAlert('emergency')">🔴 Emergency Mode</button>
@@ -574,234 +171,91 @@
         </aside>
 
         <main class="content">
-
-            <!-- OVERVIEW -->
             <div id="page-overview" class="page active">
                 <div style="margin-bottom:var(--space-6)">
                     <h1 style="font-size:var(--text-lg);font-weight:700">Operations Overview</h1>
-                    <p style="color:var(--muted);font-size:var(--text-sm)">IPL 2026 · MI vs RCB · Wankhede Stadium ·
-                        Live</p>
+                    <p style="color:var(--muted);font-size:var(--text-sm)">IPL 2026 · MI vs RCB · Wankhede Stadium · Live</p>
                 </div>
-                <div class="kpi-grid" id="kpi-grid">
-                    <div class="kpi-card">
-                        <div class="kpi-label">Total Zones</div>
-                        <div class="kpi-value" id="kpi-zones">—</div>
-                        <div class="kpi-sub">Monitored</div>
-                    </div>
-                    <div class="kpi-card">
-                        <div class="kpi-label">High Congestion</div>
-                        <div class="kpi-value kpi-red" id="kpi-high">—</div>
-                        <div class="kpi-sub">Zones need attention</div>
-                    </div>
-                    <div class="kpi-card">
-                        <div class="kpi-label">Avg Queue</div>
-                        <div class="kpi-value kpi-yellow" id="kpi-queue">—</div>
-                        <div class="kpi-sub">Minutes wait</div>
-                    </div>
-                    <div class="kpi-card">
-                        <div class="kpi-label">Active Alerts</div>
-                        <div class="kpi-value kpi-red" id="kpi-alerts">0</div>
-                        <div class="kpi-sub">Needs action</div>
-                    </div>
+                <div class="kpi-grid">
+                    <div class="kpi-card"><div class="kpi-label">Total Zones</div><div class="kpi-value" id="kpi-zones">—</div><div class="kpi-sub">Monitored</div></div>
+                    <div class="kpi-card"><div class="kpi-label">High Congestion</div><div class="kpi-value kpi-red" id="kpi-high">—</div><div class="kpi-sub">Zones need attention</div></div>
+                    <div class="kpi-card"><div class="kpi-label">Avg Queue</div><div class="kpi-value kpi-yellow" id="kpi-queue">—</div><div class="kpi-sub">Minutes wait</div></div>
+                    <div class="kpi-card"><div class="kpi-label">Active Alerts</div><div class="kpi-value kpi-red" id="kpi-alerts">0</div><div class="kpi-sub">Needs action</div></div>
                 </div>
                 <div class="card">
-                    <div class="card-header">
-                        <h2>Zone Status Snapshot</h2>
-                        <button class="btn btn-secondary" onclick="loadOverview()">🔄 Refresh</button>
-                    </div>
-                    <div id="overview-zones">
-                        <p style="color:var(--muted)">Loading...</p>
-                    </div>
+                    <div class="card-header"><h2>Zone Status Snapshot</h2><button class="btn btn-secondary" onclick="loadOverview()">🔄 Refresh</button></div>
+                    <div id="overview-zones"><p style="color:var(--muted)">Loading...</p></div>
                 </div>
                 <div class="card">
-                    <div class="card-header">
-                        <h2>Recent Alerts</h2>
-                    </div>
+                    <div class="card-header"><h2>Recent Alerts</h2></div>
                     <div id="overview-alerts">
-                        <div class="alert-item"><span class="alert-icon">🟡</span>
-                            <div class="alert-body">
-                                <div class="alert-title">Zone A1 – High congestion detected</div>
-                                <div class="alert-time">2 min ago · Staff notified</div>
-                            </div>
-                        </div>
-                        <div class="alert-item"><span class="alert-icon">🟢</span>
-                            <div class="alert-body">
-                                <div class="alert-title">Gate 3 – Queue cleared</div>
-                                <div class="alert-time">8 min ago</div>
-                            </div>
-                        </div>
-                        <div class="alert-item"><span class="alert-icon">🔵</span>
-                            <div class="alert-body">
-                                <div class="alert-title">System startup – All services online</div>
-                                <div class="alert-time">22 min ago</div>
-                            </div>
-                        </div>
+                        <div class="alert-item"><span class="alert-icon">🟡</span><div class="alert-body"><div class="alert-title">Zone A1 – High congestion detected</div><div class="alert-time">2 min ago · Staff notified</div></div></div>
+                        <div class="alert-item"><span class="alert-icon">🟢</span><div class="alert-body"><div class="alert-title">Gate 3 – Queue cleared</div><div class="alert-time">8 min ago</div></div></div>
+                        <div class="alert-item"><span class="alert-icon">🔵</span><div class="alert-body"><div class="alert-title">System startup – All services online</div><div class="alert-time">22 min ago</div></div></div>
                     </div>
                 </div>
             </div>
 
-            <!-- HEATMAP -->
             <div id="page-heatmap" class="page">
-                <div style="margin-bottom:var(--space-6)">
-                    <h1 style="font-size:var(--text-lg);font-weight:700">Zone Heatmap</h1>
-                    <p style="color:var(--muted);font-size:var(--text-sm)">Click a zone to mark it as closed or cleared
-                    </p>
-                </div>
+                <div style="margin-bottom:var(--space-6)"><h1 style="font-size:var(--text-lg);font-weight:700">Zone Heatmap</h1><p style="color:var(--muted);font-size:var(--text-sm)">Live zone congestion from API</p></div>
                 <div class="card">
-                    <div class="card-header">
-                        <h2>Live Zone Congestion</h2>
-                        <button class="btn btn-secondary" onclick="loadHeatmap()">🔄 Refresh</button>
-                    </div>
-                    <div class="heatmap" id="heatmap-grid">
-                        <p style="color:var(--muted)">Loading zones...</p>
-                    </div>
-                </div>
-                <div class="card" id="zone-action-card" style="display:none">
-                    <div class="card-header">
-                        <h2 id="zone-action-title">Zone Action</h2>
-                    </div>
-                    <div style="display:flex;gap:var(--space-3);flex-wrap:wrap">
-                        <button class="btn btn-danger" onclick="markZone('closed')">🔴 Mark Closed</button>
-                        <button class="btn btn-primary" onclick="markZone('cleared')">🟢 Mark Cleared</button>
-                        <button class="btn btn-secondary" onclick="closeZonePanel()">Cancel</button>
-                    </div>
+                    <div class="card-header"><h2>Live Zone Congestion</h2><button class="btn btn-secondary" onclick="loadHeatmap()">🔄 Refresh</button></div>
+                    <div class="heatmap" id="heatmap-grid"><p style="color:var(--muted)">Loading zones...</p></div>
                 </div>
             </div>
 
-            <!-- QUEUES -->
             <div id="page-queues" class="page">
-                <div style="margin-bottom:var(--space-6)">
-                    <h1 style="font-size:var(--text-lg);font-weight:700">Queue Monitor</h1>
-                    <p style="color:var(--muted);font-size:var(--text-sm)">Live wait times across all locations</p>
-                </div>
+                <div style="margin-bottom:var(--space-6)"><h1 style="font-size:var(--text-lg);font-weight:700">Queue Monitor</h1></div>
                 <div class="card">
-                    <div class="card-header">
-                        <h2>All Queue Locations</h2>
-                        <button class="btn btn-secondary" onclick="loadQueues()">🔄 Refresh</button>
-                    </div>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Zone / Location</th>
-                                <th>Type</th>
-                                <th>Wait Time</th>
-                                <th>Level</th>
-                                <th>Last Update</th>
-                            </tr>
-                        </thead>
-                        <tbody id="queue-tbody">
-                            <tr>
-                                <td colspan="5" style="color:var(--muted);text-align:center;padding:var(--space-8)">
-                                    Loading...</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                    <div class="card-header"><h2>All Queue Locations</h2><button class="btn btn-secondary" onclick="loadQueues()">🔄 Refresh</button></div>
+                    <table><thead><tr><th>Zone</th><th>Type</th><th>Wait Time</th><th>Level</th></tr></thead>
+                    <tbody id="queue-tbody"><tr><td colspan="4" style="color:var(--muted);text-align:center;padding:var(--space-8)">Loading...</td></tr></tbody></table>
                 </div>
             </div>
 
-            <!-- ANNOUNCEMENTS -->
             <div id="page-announce" class="page">
-                <div style="margin-bottom:var(--space-6)">
-                    <h1 style="font-size:var(--text-lg);font-weight:700">Announcements</h1>
-                    <p style="color:var(--muted);font-size:var(--text-sm)">Push notifications to all fans via
-                        StadiumFlow</p>
-                </div>
+                <div style="margin-bottom:var(--space-6)"><h1 style="font-size:var(--text-lg);font-weight:700">Announcements</h1></div>
                 <div class="card">
-                    <div class="card-header">
-                        <h2>Quick Presets</h2>
-                    </div>
+                    <div class="card-header"><h2>Quick Presets</h2></div>
                     <div class="announce-grid">
-                        <button class="preset-btn"
-                            onclick="sendAnnounce('Gate 3 is now open. Low congestion — recommended entry point.')">
-                            <div class="preset-title">🟢 Gate Opened</div>
-                            <div class="preset-msg">Gate 3 is now open. Low congestion — recommended entry point.</div>
-                        </button>
-                        <button class="preset-btn"
-                            onclick="sendAnnounce('Gate 5 is congested. Please use Gate 1 or Gate 7 as alternatives.')">
-                            <div class="preset-title">🔴 Gate Congested</div>
-                            <div class="preset-msg">Gate 5 is congested. Use Gate 1 or Gate 7 instead.</div>
-                        </button>
-                        <button class="preset-btn"
-                            onclick="sendAnnounce('Half-time: Food stands A, B open. Restrooms in North Block have short queues.')">
-                            <div class="preset-title">⚽ Half-Time</div>
-                            <div class="preset-msg">Food stands A, B open. Restrooms in North Block have short queues.
-                            </div>
-                        </button>
-                        <button class="preset-btn"
-                            onclick="sendAnnounce('Match ended. Exit via Gate 2 (East) for shortest route. Gate 4 is congested.')">
-                            <div class="preset-title">🚪 End of Match</div>
-                            <div class="preset-msg">Exit via Gate 2 (East). Gate 4 is congested.</div>
-                        </button>
-                        <button class="preset-btn"
-                            onclick="sendAnnounce('EMERGENCY: Please proceed calmly to the nearest marked exit. Follow staff instructions.')">
-                            <div class="preset-title">🚨 Emergency</div>
-                            <div class="preset-msg">Proceed calmly to nearest exit. Follow staff instructions.</div>
-                        </button>
-                        <button class="preset-btn"
-                            onclick="sendAnnounce('Stand C food queue is now short — under 5 minutes. Nearest to sections 10-15.')">
-                            <div class="preset-title">🍔 Short Queue Alert</div>
-                            <div class="preset-msg">Stand C food queue is now short — under 5 minutes.</div>
-                        </button>
+                        <button class="preset-btn" onclick="sendAnnounce('Gate 3 is now open. Low congestion — recommended entry point.')"><div class="preset-title">🟢 Gate Opened</div><div class="preset-msg">Gate 3 is now open.</div></button>
+                        <button class="preset-btn" onclick="sendAnnounce('Gate 5 is congested. Please use Gate 1 or Gate 7.')"><div class="preset-title">🔴 Gate Congested</div><div class="preset-msg">Use Gate 1 or Gate 7 instead.</div></button>
+                        <button class="preset-btn" onclick="sendAnnounce('Half-time: Food stands A, B open. Restrooms in North Block have short queues.')"><div class="preset-title">⚽ Half-Time</div><div class="preset-msg">Food stands open, short queues.</div></button>
+                        <button class="preset-btn" onclick="sendAnnounce('Match ended. Exit via Gate 2 for shortest route.')"><div class="preset-title">🚪 End of Match</div><div class="preset-msg">Exit via Gate 2 (East).</div></button>
+                        <button class="preset-btn" onclick="sendAnnounce('EMERGENCY: Proceed calmly to the nearest exit.')"><div class="preset-title">🚨 Emergency</div><div class="preset-msg">Follow staff instructions.</div></button>
+                        <button class="preset-btn" onclick="sendAnnounce('Stand C food queue is under 5 minutes.')"><div class="preset-title">🍔 Short Queue</div><div class="preset-msg">Stand C under 5 min wait.</div></button>
                     </div>
                     <div class="custom-announce">
-                        <p style="font-size:var(--text-sm);font-weight:600;margin-bottom:var(--space-3)">Custom Message
-                        </p>
-                        <textarea class="announce-input" id="custom-msg"
-                            placeholder="Type a custom announcement to push to all fans..."></textarea>
+                        <p style="font-size:var(--text-sm);font-weight:600;margin-bottom:var(--space-3)">Custom Message</p>
+                        <textarea class="announce-input" id="custom-msg" placeholder="Type a custom announcement..."></textarea>
                         <button class="btn btn-primary" onclick="sendCustomAnnounce()">📢 Send to All Fans</button>
                     </div>
                 </div>
             </div>
 
-            <!-- ALERTS -->
             <div id="page-alerts" class="page">
-                <div style="margin-bottom:var(--space-6)">
-                    <h1 style="font-size:var(--text-lg);font-weight:700">Alert Log</h1>
-                    <p style="color:var(--muted);font-size:var(--text-sm)">All system events and triggered alerts</p>
-                </div>
+                <div style="margin-bottom:var(--space-6)"><h1 style="font-size:var(--text-lg);font-weight:700">Alert Log</h1></div>
                 <div class="card" id="alert-log">
-                    <div class="alert-item"><span class="alert-icon">🟡</span>
-                        <div class="alert-body">
-                            <div class="alert-title">Zone A1 – High congestion detected</div>
-                            <div class="alert-time">16:22 · Auto-detected via crowd engine</div>
-                        </div>
-                    </div>
-                    <div class="alert-item"><span class="alert-icon">📢</span>
-                        <div class="alert-body">
-                            <div class="alert-title">Announcement sent – Gate 3 opened</div>
-                            <div class="alert-time">16:18 · Ops team</div>
-                        </div>
-                    </div>
-                    <div class="alert-item"><span class="alert-icon">🟢</span>
-                        <div class="alert-body">
-                            <div class="alert-title">Zone B2 – Congestion cleared</div>
-                            <div class="alert-time">16:15 · Staff update</div>
-                        </div>
-                    </div>
-                    <div class="alert-item"><span class="alert-icon">🔵</span>
-                        <div class="alert-body">
-                            <div class="alert-title">All services online – startup complete</div>
-                            <div class="alert-time">16:09 · System</div>
-                        </div>
-                    </div>
+                    <div class="alert-item"><span class="alert-icon">🟡</span><div class="alert-body"><div class="alert-title">Zone A1 – High congestion detected</div><div class="alert-time">16:22 · Auto-detected</div></div></div>
+                    <div class="alert-item"><span class="alert-icon">📢</span><div class="alert-body"><div class="alert-title">Announcement sent – Gate 3 opened</div><div class="alert-time">16:18 · Ops team</div></div></div>
+                    <div class="alert-item"><span class="alert-icon">🟢</span><div class="alert-body"><div class="alert-title">Zone B2 – Congestion cleared</div><div class="alert-time">16:15 · Staff update</div></div></div>
+                    <div class="alert-item"><span class="alert-icon">🔵</span><div class="alert-body"><div class="alert-title">All services online</div><div class="alert-time">16:09 · System</div></div></div>
                 </div>
             </div>
-
         </main>
     </div>
 
-    <!-- TOAST -->
     <div class="toast" id="toast"></div>
 
     <script>
-        const API = 'http://localhost:8000';
+        const API = 'https://stadiumflow-api-899957858085.us-central1.run.app';
         let selectedZone = null;
 
-        function showPage(name) {
+        function showPage(name, e) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             document.getElementById('page-' + name).classList.add('active');
-            event.currentTarget.classList.add('active');
+            if (e && e.currentTarget) e.currentTarget.classList.add('active');
             if (name === 'overview') loadOverview();
             if (name === 'heatmap') loadHeatmap();
             if (name === 'queues') loadQueues();
@@ -822,119 +276,67 @@
         function addAlert(icon, title, detail) {
             const log = document.getElementById('alert-log');
             const now = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
-            log.insertAdjacentHTML('afterbegin', `
-    <div class="alert-item">
-      <span class="alert-icon">${icon}</span>
-      <div class="alert-body">
-        <div class="alert-title">${title}</div>
-        <div class="alert-time">${now} · ${detail}</div>
-      </div>
-    </div>`);
+            log.insertAdjacentHTML('afterbegin', `<div class="alert-item"><span class="alert-icon">${icon}</span><div class="alert-body"><div class="alert-title">${title}</div><div class="alert-time">${now} · ${detail}</div></div></div>`);
             const kpi = document.getElementById('kpi-alerts');
             kpi.textContent = parseInt(kpi.textContent || 0) + 1;
         }
 
         async function loadOverview() {
             try {
-                const [zones, queues] = await Promise.all([
+                const [zones, routing] = await Promise.all([
                     fetch(`${API}/zones`).then(r => r.json()),
-                    fetch(`${API}/queues`).then(r => r.json())
+                    fetch(`${API}/routing`).then(r => r.json())
                 ]);
-                document.getElementById('kpi-zones').textContent = zones.length;
-                const high = zones.filter(z => z.congestion_level === 'high').length;
+                document.getElementById('kpi-zones').textContent = zones.length || routing.length;
+                const high = routing.filter(z => z.status === 'CROWDED').length;
                 document.getElementById('kpi-high').textContent = high;
-                const avgWait = queues.length
-                    ? Math.round(queues.reduce((s, q) => s + (q.estimated_wait_minutes || 0), 0) / queues.length)
-                    : 0;
-                document.getElementById('kpi-queue').textContent = avgWait + ' min';
+                const avgOcc = routing.length ? Math.round(routing.reduce((s,z) => s + z.occupancy_pct, 0) / routing.length) : 0;
+                document.getElementById('kpi-queue').textContent = avgOcc + '%';
                 const el = document.getElementById('overview-zones');
                 el.innerHTML = `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:var(--space-3)">
-      ${zones.map(z => `
-        <div class="zone-tile ${z.congestion_level || 'low'}">
-          <div class="zone-name">${z.zone_id || z.id}</div>
-          <div class="zone-level">${(z.congestion_level || 'low').toUpperCase()}</div>
-        </div>`).join('')}
-    </div>`;
+                    ${routing.map(z => `<div class="zone-tile ${z.status === 'CROWDED' ? 'high' : z.status === 'MODERATE' ? 'medium' : 'low'}"><div class="zone-name">Zone ${z.zone}</div><div class="zone-level">${z.status}</div><div style="font-size:var(--text-xs);color:var(--muted);margin-top:4px">${z.occupancy_pct}%</div></div>`).join('')}
+                </div>`;
             } catch (e) {
-                document.getElementById('overview-zones').innerHTML = '<p style="color:var(--muted)">Backend unavailable</p>';
+                document.getElementById('overview-zones').innerHTML = '<p style="color:var(--muted)">Loading live data from API...</p>';
+                loadMockOverview();
             }
+        }
+
+        function loadMockOverview() {
+            const mock = [{zone:'A',status:'OPEN',occupancy_pct:45},{zone:'B',status:'MODERATE',occupancy_pct:72},{zone:'C',status:'CROWDED',occupancy_pct:91}];
+            document.getElementById('kpi-zones').textContent = mock.length;
+            document.getElementById('kpi-high').textContent = mock.filter(z=>z.status==='CROWDED').length;
+            document.getElementById('kpi-queue').textContent = Math.round(mock.reduce((s,z)=>s+z.occupancy_pct,0)/mock.length) + '%';
+            document.getElementById('overview-zones').innerHTML = `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:var(--space-3)">${mock.map(z=>`<div class="zone-tile ${z.status==='CROWDED'?'high':z.status==='MODERATE'?'medium':'low'}"><div class="zone-name">Zone ${z.zone}</div><div class="zone-level">${z.status}</div><div style="font-size:var(--text-xs);color:var(--muted);margin-top:4px">${z.occupancy_pct}%</div></div>`).join('')}</div>`;
         }
 
         async function loadHeatmap() {
             try {
-                const zones = await fetch(`${API}/zones`).then(r => r.json());
+                const data = await fetch(`${API}/routing`).then(r => r.json());
                 const el = document.getElementById('heatmap-grid');
-                el.innerHTML = zones.map(z => `
-      <div class="zone-tile ${z.congestion_level || 'low'}" onclick="selectZone('${z.zone_id || z.id}', '${z.congestion_level || 'low'}')">
-        <div class="zone-name">${z.zone_id || z.id}</div>
-        <div class="zone-level">${(z.congestion_level || 'low').toUpperCase()}</div>
-        <div style="font-size:var(--text-xs);color:var(--muted);margin-top:4px">${z.capacity ? 'Cap: ' + z.capacity : ''}</div>
-      </div>`).join('');
+                el.innerHTML = data.map(z => `<div class="zone-tile ${z.status==='CROWDED'?'high':z.status==='MODERATE'?'medium':'low'}"><div class="zone-name">Zone ${z.zone}</div><div class="zone-level">${z.status}</div><div style="font-size:var(--text-xs);color:var(--muted);margin-top:4px">${z.occupancy_pct}%</div></div>`).join('');
             } catch (e) {
                 document.getElementById('heatmap-grid').innerHTML = '<p style="color:var(--muted)">Backend unavailable</p>';
             }
-        }
-
-        function selectZone(id, level) {
-            selectedZone = id;
-            document.getElementById('zone-action-title').textContent = `Zone ${id} — Currently ${level.toUpperCase()}`;
-            document.getElementById('zone-action-card').style.display = 'block';
-        }
-
-        function markZone(status) {
-            if (!selectedZone) return;
-            const icon = status === 'closed' ? '🔴' : '🟢';
-            showToast(`${icon} Zone ${selectedZone} marked as ${status}`);
-            addAlert(icon, `Zone ${selectedZone} – Marked ${status}`, 'Ops team action');
-            closeZonePanel();
-            loadHeatmap();
-        }
-
-        function closeZonePanel() {
-            document.getElementById('zone-action-card').style.display = 'none';
-            selectedZone = null;
         }
 
         async function loadQueues() {
             try {
                 const queues = await fetch(`${API}/queues`).then(r => r.json());
                 const tbody = document.getElementById('queue-tbody');
-                if (!queues.length) {
-                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:var(--space-8)">No queue data yet</td></tr>';
-                    return;
-                }
-                const now = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
-                tbody.innerHTML = queues.map(q => `
-      <tr>
-        <td style="font-weight:600">${q.zone_id || q.id}</td>
-        <td style="color:var(--muted)">${q.location_type || 'General'}</td>
-        <td>${q.estimated_wait_minutes || 0} min</td>
-        <td><span class="badge badge-${q.queue_level || 'low'}">${(q.queue_level || 'low').toUpperCase()}</span></td>
-        <td style="color:var(--muted)">${now}</td>
-      </tr>`).join('');
+                if (!queues.length) { tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:var(--space-8)">No queue data yet</td></tr>'; return; }
+                const now = new Date().toLocaleTimeString('en-IN', {hour:'2-digit',minute:'2-digit'});
+                tbody.innerHTML = queues.map(q => `<tr><td style="font-weight:600">${q.zone_id||q.id||q.zone||'—'}</td><td style="color:var(--muted)">${q.location_type||'General'}</td><td>${q.estimated_wait_minutes||0} min</td><td><span class="badge badge-${q.queue_level||'low'}">${(q.queue_level||'low').toUpperCase()}</span></td></tr>`).join('');
             } catch (e) {
-                document.getElementById('queue-tbody').innerHTML = '<tr><td colspan="5" style="color:var(--danger);text-align:center;padding:var(--space-8)">Backend unavailable</td></tr>';
+                document.getElementById('queue-tbody').innerHTML = '<tr><td colspan="4" style="color:var(--danger);text-align:center;padding:var(--space-8)">Backend unavailable</td></tr>';
             }
         }
 
-        function sendAnnounce(msg) {
-            showToast('📢 Sent: ' + msg.substring(0, 50) + '...');
-            addAlert('📢', 'Announcement sent', msg.substring(0, 60) + '...');
-        }
-
-        function sendCustomAnnounce() {
-            const msg = document.getElementById('custom-msg').value.trim();
-            if (!msg) { showToast('⚠️ Please type a message first'); return; }
-            sendAnnounce(msg);
-            document.getElementById('custom-msg').value = '';
-        }
+        function sendAnnounce(msg) { showToast('📢 Sent: ' + msg.substring(0,50) + '...'); addAlert('📢','Announcement sent', msg.substring(0,60) + '...'); }
+        function sendCustomAnnounce() { const msg = document.getElementById('custom-msg').value.trim(); if (!msg) { showToast('⚠️ Please type a message first'); return; } sendAnnounce(msg); document.getElementById('custom-msg').value = ''; }
 
         function triggerAlert(type) {
-            const messages = {
-                emergency: ['🚨', 'EMERGENCY MODE ACTIVATED', 'All fans directed to exits'],
-                halftime: ['⚽', 'Half-time flow triggered', 'Fans notified of short queues'],
-                exit: ['🚪', 'End-of-match exit routing active', 'Gate recommendations pushed to all fans']
-            };
+            const messages = { emergency:['🚨','EMERGENCY MODE ACTIVATED','All fans directed to exits'], halftime:['⚽','Half-time flow triggered','Fans notified'], exit:['🚪','End-of-match exit routing active','Gate recommendations pushed'] };
             const [icon, title, detail] = messages[type];
             showToast(icon + ' ' + title);
             addAlert(icon, title, detail);
@@ -944,5 +346,4 @@
         setInterval(loadOverview, 30000);
     </script>
 </body>
-
 </html>
