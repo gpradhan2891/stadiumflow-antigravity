@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>StadiumFlow – Fan Assistant</title>
+    <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700&display=swap" rel="stylesheet" />
+    <style>
+        :root {
+            --font-body: 'Satoshi', sans-serif;
+            --text-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
+            --text-sm: clamp(0.875rem, 0.8rem + 0.35vw, 1rem);
+            --text-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+            --text-lg: clamp(1.125rem, 1rem + 0.75vw, 1.5rem);
+            --text-xl: clamp(1.5rem, 1.2rem + 1.25vw, 2.25rem);
+            --space-2: 0.5rem;
+            --space-3: 0.75rem;
+            --space-4: 1rem;
+            --space-6: 1.5rem;
+            --space-8: 2rem;
+            --space-12: 3rem;
+            --radius-md: 0.5rem;
+            --radius-lg: 0.75rem;
+            --radius-xl: 1rem;
+            --radius-full: 9999px;
+        }
+
+        [data-theme="dark"] {
+            --bg: #0f1117;
+            --surface: #1a1d27;
+            --surface-2: #22263a;
+            --border: #2e3248;
+            --text: #e8eaf6;
+            --muted: #8b8fa8;
+            --accent: #4f8ef7;
+            --accent-hover: #3a7cf5;
+            --success: #4caf7d;
+            --warning: #f5a623;
+            --danger: #f45b5b;
+        }
+
+        [data-theme="light"] {
+            --bg: #f4f6fb;
+            --surface: #ffffff;
+            --surface-2: #eef1f8;
+            --border: #d0d5e8;
+            --text: #1a1d2e;
+            --muted: #6b7280;
+            --accent: #2563eb;
+            --accent-hover: #1d4ed8;
+            --success: #16a34a;
+            --warning: #d97706;
+            --danger: #dc2626;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100dvh;
+            font-size: var(--text-base);
+        }
+
+        header {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: var(--space-4) var(--space-6);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: var(--space-3);
+            font-weight: 700;
+            font-size: var(--text-lg);
+        }
+
+        .logo svg {
+            color: var(--accent);
+        }
+
+        .theme-btn {
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-full);
+            padding: var(--space-2) var(--space-3);
+            color: var(--text);
+            cursor: pointer;
+            font-size: var(--text-sm);
+        }
+
+        nav {
+            display: flex;
+            gap: 0;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 0 var(--space-6);
+        }
+
+        .nav-tab {
+            padding: var(--space-3) var(--space-4);
+            cursor: pointer;
+            font-size: var(--text-sm);
+            font-weight: 500;
+            color: var(--muted);
+            border-bottom: 2px solid transparent;
+            transition: all 180ms ease;
+            background: none;
+            border-top: none;
+            border-left: none;
+            border-right: none;
+        }
+
+        .nav-tab.active {
+            color: var(--accent);
+            border-bottom-color: var(--accent);
+        }
+
+        .nav-tab:hover {
+            color: var(--text);
+        }
+
+        main {
+            max-width: 680px;
+            margin: 0 auto;
+            padding: var(--space-6) var(--space-4);
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            padding: var(--space-6);
+            margin-bottom: var(--space-4);
+        }
+
+        .card h2 {
+            font-size: var(--text-lg);
+            margin-bottom: var(--space-4);
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-2);
+            padding: var(--space-2) var(--space-3);
+            border-radius: var(--radius-full);
+            font-size: var(--text-xs);
+            font-weight: 600;
+        }
+
+        .badge-low {
+            background: oklch(from var(--success) l c h / 0.15);
+            color: var(--success);
+        }
+
+        .badge-medium {
+            background: oklch(from var(--warning) l c h / 0.15);
+            color: var(--warning);
+        }
+
+        .badge-high {
+            background: oklch(from var(--danger) l c h / 0.15);
+            color: var(--danger);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-2);
+            padding: var(--space-3) var(--space-6);
+            border-radius: var(--radius-md);
+            font-size: var(--text-sm);
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 180ms ease;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-hover);
+        }
+
+        .btn-secondary {
+            background: var(--surface-2);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--border);
+        }
+
+        .gate-card {
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: var(--space-4);
+            margin-bottom: var(--space-3);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .gate-card.best {
+            border-color: var(--accent);
+            background: oklch(from var(--accent) l c h / 0.08);
+        }
+
+        .gate-info h3 {
+            font-size: var(--text-base);
+            font-weight: 600;
+        }
+
+        .gate-info p {
+            font-size: var(--text-sm);
+            color: var(--muted);
+            margin-top: 4px;
+        }
+
+        .gate-score {
+            text-align: right;
+        }
+
+        .gate-score .score {
+            font-size: var(--text-lg);
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        .gate-score span {
+            font-size: var(--text-xs);
+            color: var(--muted);
+        }
+
+        .queue-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--space-4);
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            margin-bottom: var(--space-3);
+        }
+
+        .queue-info h3 {
+            font-size: var(--text-sm);
+            font-weight: 600;
+        }
+
+        .queue-info p {
+            font-size: var(--text-xs);
+            color: var(--muted);
+        }
+
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            height: 420px;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: var(--space-4);
+            background: var(--surface-2);
+            border-radius: var(--radius-lg);
+            margin-bottom: var(--space-4);
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-3);
+        }
+
+        .msg {
+            max-width: 80%;
+            padding: var(--space-3) var(--space-4);
+            border-radius: var(--radius-lg);
+            font-size: var(--text-sm);
+            line-height: 1.5;
+        }
+
+        .msg-bot {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+        }
+
+        .msg-user {
+            background: var(--accent);
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+        }
+
+        .chat-input-row {
+            display: flex;
+            gap: var(--space-3);
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: var(--space-3) var(--space-4);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            color: var(--text);
+            font-family: var(--font-body);
+            font-size: var(--text-sm);
+        }
+
+        .chat-input:focus {
+            outline: 2px solid var(--accent);
+            outline-offset: 2px;
+        }
+
+        .loading {
+            opacity: 0.6;
+            font-style: italic;
+        }
+
+        .recommend-banner {
+            background: oklch(from var(--accent) l c h / 0.1);
+            border: 1px solid oklch(from var(--accent) l c h / 0.3);
+            border-radius: var(--radius-lg);
+            padding: var(--space-4);
+            margin-bottom: var(--space-4);
+            display: flex;
+            align-items: center;
+            gap: var(--space-3);
+        }
+
+        .loc-input-row {
+            display: flex;
+            gap: var(--space-3);
+            margin-bottom: var(--space-4);
+            flex-wrap: wrap;
+        }
+
+        .loc-input {
+            flex: 1;
+            min-width: 120px;
+            padding: var(--space-3);
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            color: var(--text);
+            font-size: var(--text-sm);
+        }
+
+        @media (max-width: 480px) {
+            nav {
+                overflow-x: auto;
+            }
+
+            .loc-input-row {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="logo">
+            <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-label="StadiumFlow logo">
+                <circle cx="14" cy="14" r="12" stroke="currentColor" stroke-width="2" />
+                <path d="M8 14 Q14 6 20 14 Q14 22 8 14Z" fill="currentColor" opacity="0.3" />
+                <circle cx="14" cy="14" r="3" fill="currentColor" />
+                <path d="M14 2 L14 6 M14 22 L14 26 M2 14 L6 14 M22 14 L26 14" stroke="currentColor" stroke-width="1.5"
+                    stroke-linecap="round" />
+            </svg>
+            StadiumFlow
+        </div>
+        <button class="theme-btn" onclick="toggleTheme()" aria-label="Toggle theme">🌙 Theme</button>
+    </header>
+
+    <nav role="tablist">
+        <button class="nav-tab active" onclick="showTab('home')" role="tab">🏠 Home</button>
+        <button class="nav-tab" onclick="showTab('gates')" role="tab">🚪 Gates</button>
+        <button class="nav-tab" onclick="showTab('queues')" role="tab">⏱ Queues</button>
+        <button class="nav-tab" onclick="showTab('chat')" role="tab">💬 Assistant</button>
+    </nav>
+
+    <main>
+        <!-- HOME -->
+        <section id="home" class="section active">
+            <div class="card">
+                <h2>🏟️ IPL 2026 – MI vs RCB</h2>
+                <p style="color:var(--muted);font-size:var(--text-sm);margin-bottom:var(--space-4)">Wankhede Stadium ·
+                    Today 7:30 PM · Section B, Row 12, Seat 45</p>
+                <div class="recommend-banner">
+                    <span style="font-size:1.5rem">✅</span>
+                    <div>
+                        <strong>Recommended: Gate 1 – North</strong>
+                        <p style="font-size:var(--text-sm);color:var(--muted);margin-top:4px">~6 min walk · Low
+                            congestion · Best route now</p>
+                    </div>
+                </div>
+                <div style="display:flex;gap:var(--space-3);flex-wrap:wrap">
+                    <button class="btn btn-primary" onclick="showTab('gates')">🚪 Best Gate</button>
+                    <button class="btn btn-secondary" onclick="showTab('queues')">⏱ Check Queues</button>
+                    <button class="btn btn-secondary" onclick="showTab('chat')">💬 Ask Assistant</button>
+                </div>
+            </div>
+            <div class="card">
+                <h2>📍 Live Zone Status</h2>
+                <div id="zone-status">
+                    <p style="color:var(--muted)">Loading zone data...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- GATES -->
+        <section id="gates" class="section">
+            <div class="card">
+                <h2>🚪 Best Gate Finder</h2>
+                <p style="color:var(--muted);font-size:var(--text-sm);margin-bottom:var(--space-4)">Enter your location
+                    to find the fastest gate</p>
+                <div class="loc-input-row">
+                    <input class="loc-input" id="lat" type="number" placeholder="Latitude" value="12.9715"
+                        step="0.0001" />
+                    <input class="loc-input" id="lng" type="number" placeholder="Longitude" value="77.5945"
+                        step="0.0001" />
+                    <button class="btn btn-primary" onclick="findBestGate()">Find Gate</button>
+                </div>
+                <div id="gate-results">
+                    <p style="color:var(--muted)">Enter your coordinates above to get recommendations.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- QUEUES -->
+        <section id="queues" class="section">
+            <div class="card">
+                <h2>⏱ Live Queue Status</h2>
+                <p style="color:var(--muted);font-size:var(--text-sm);margin-bottom:var(--space-4)">Real-time wait times
+                    from staff updates</p>
+                <div id="queue-list">
+                    <p style="color:var(--muted)">Loading queues...</p>
+                </div>
+                <button class="btn btn-secondary" style="margin-top:var(--space-4)" onclick="loadQueues()">🔄
+                    Refresh</button>
+            </div>
+        </section>
+
+        <!-- CHAT -->
+        <section id="chat" class="section">
+            <div class="card">
+                <h2>💬 StadiumFlow Assistant</h2>
+                <div class="chat-container">
+                    <div class="chat-messages" id="chat-messages">
+                        <div class="msg msg-bot">👋 Hi! I'm your StadiumFlow assistant. Ask me about gates, queues,
+                            food, or navigation!</div>
+                        <div class="msg msg-bot">Try: <em>"Which gate is least crowded?"</em> or <em>"Where's the
+                                shortest food queue?"</em></div>
+                    </div>
+                    <div class="chat-input-row">
+                        <input class="chat-input" id="chat-input" type="text"
+                            placeholder="Ask anything about the stadium..."
+                            onkeydown="if(event.key==='Enter')sendMessage()" />
+                        <button class="btn btn-primary" onclick="sendMessage()">Send</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        const API = 'http://localhost:8000';
+
+        function showTab(name) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+            document.getElementById(name).classList.add('active');
+            document.querySelectorAll('.nav-tab')[['home', 'gates', 'queues', 'chat'].indexOf(name)].classList.add('active');
+            if (name === 'queues') loadQueues();
+            if (name === 'home') loadZoneStatus();
+        }
+
+        function toggleTheme() {
+            const html = document.documentElement;
+            html.setAttribute('data-theme', html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+        }
+
+        async function findBestGate() {
+            const lat = document.getElementById('lat').value;
+            const lng = document.getElementById('lng').value;
+            const el = document.getElementById('gate-results');
+            el.innerHTML = '<p class="loading">Finding best gate...</p>';
+            try {
+                const res = await fetch(`${API}/route/best-gate?user_lat=${lat}&user_lng=${lng}`);
+                const data = await res.json();
+                el.innerHTML = data.all_gates.map((g, i) => `
+      <div class="gate-card ${i === 0 ? 'best' : ''}">
+        <div class="gate-info">
+          <h3>${i === 0 ? '⭐ ' : ''}${g.name}</h3>
+          <p>${g.distance_text} · ${g.walk_minutes} min walk · +${g.congestion_penalty_minutes} min queue</p>
+        </div>
+        <div class="gate-score">
+          <div class="score">${g.total_score.toFixed(1)}</div>
+          <span>min total</span>
+        </div>
+      </div>`).join('');
+            } catch (e) {
+                el.innerHTML = '<p style="color:var(--danger)">Could not load gate data. Is the backend running?</p>';
+            }
+        }
+
+        async function loadQueues() {
+            const el = document.getElementById('queue-list');
+            if (!el) return;
+            el.innerHTML = '<p class="loading">Loading queues...</p>';
+            try {
+                const res = await fetch(`${API}/queues`);
+                const data = await res.json();
+                if (!data.length) {
+                    el.innerHTML = '<p style="color:var(--muted)">No queue data yet. Staff updates will appear here.</p>';
+                    return;
+                }
+                el.innerHTML = data.map(q => `
+      <div class="queue-item">
+        <div class="queue-info">
+          <h3>${q.zone_id || q.id}</h3>
+          <p>${q.location_type || 'General'}</p>
+        </div>
+        <div style="display:flex;align-items:center;gap:var(--space-3)">
+          <span style="font-size:var(--text-sm);color:var(--muted)">${q.estimated_wait_minutes || 0} min</span>
+          <span class="badge badge-${q.queue_level || 'low'}">${(q.queue_level || 'low').toUpperCase()}</span>
+        </div>
+      </div>`).join('');
+            } catch (e) {
+                el.innerHTML = '<p style="color:var(--danger)">Could not load queue data.</p>';
+            }
+        }
+
+        async function loadZoneStatus() {
+            const el = document.getElementById('zone-status');
+            try {
+                const res = await fetch(`${API}/zones`);
+                const data = await res.json();
+                if (!data.length) {
+                    el.innerHTML = '<p style="color:var(--muted)">No zone data yet.</p>';
+                    return;
+                }
+                el.innerHTML = data.map(z => `
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:var(--space-3) 0;border-bottom:1px solid var(--border)">
+        <span style="font-size:var(--text-sm)">${z.zone_id || z.id}</span>
+        <span class="badge badge-${z.congestion_level || 'low'}">${(z.congestion_level || 'low').toUpperCase()}</span>
+      </div>`).join('');
+            } catch (e) {
+                el.innerHTML = '<p style="color:var(--muted)">Zone data unavailable.</p>';
+            }
+        }
+
+        const BOT_RESPONSES = {
+            gate: () => fetch(`${API}/route/best-gate?user_lat=12.9715&user_lng=77.5945`)
+                .then(r => r.json())
+                .then(d => `🚪 Best gate right now: **${d.recommended.name}** — ${d.recommended.walk_minutes} min walk, total score ${d.recommended.total_score.toFixed(1)} min.`),
+            queue: () => fetch(`${API}/queues`).then(r => r.json())
+                .then(d => d.length ? `⏱ Queue status: ${d.map(q => `${q.zone_id} (${q.queue_level}, ~${q.estimated_wait_minutes}min)`).join(', ')}` : '⏱ No queue updates yet from staff.'),
+            default: (msg) => Promise.resolve(`I can help with gates, queues, food, and navigation! Try asking: "which gate is fastest?" or "shortest queue?"`)
+        };
+
+        async function sendMessage() {
+            const input = document.getElementById('chat-input');
+            const msg = input.value.trim();
+            if (!msg) return;
+            input.value = '';
+            const container = document.getElementById('chat-messages');
+            container.innerHTML += `<div class="msg msg-user">${msg}</div>`;
+            container.innerHTML += `<div class="msg msg-bot loading" id="typing">Thinking...</div>`;
+            container.scrollTop = container.scrollHeight;
+            const lower = msg.toLowerCase();
+            let response;
+            try {
+                if (lower.includes('gate') || lower.includes('entry') || lower.includes('enter'))
+                    response = await BOT_RESPONSES.gate();
+                else if (lower.includes('queue') || lower.includes('wait') || lower.includes('line') || lower.includes('food'))
+                    response = await BOT_RESPONSES.queue();
+                else
+                    response = await BOT_RESPONSES.default(msg);
+            } catch (e) {
+                response = '⚠️ Could not reach the backend. Make sure the server is running on port 8000.';
+            }
+            document.getElementById('typing').remove();
+            container.innerHTML += `<div class="msg msg-bot">${response}</div>`;
+            container.scrollTop = container.scrollHeight;
+        }
+
+        loadZoneStatus();
+        loadQueues();
+    </script>
+</body>
+
+</html>
