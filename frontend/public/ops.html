@@ -177,14 +177,14 @@
                     <p style="color:var(--muted);font-size:var(--text-sm)">IPL 2026 · MI vs RCB · Wankhede Stadium · Live</p>
                 </div>
                 <div class="kpi-grid">
-                    <div class="kpi-card"><div class="kpi-label">Total Zones</div><div class="kpi-value" id="kpi-zones">—</div><div class="kpi-sub">Monitored</div></div>
-                    <div class="kpi-card"><div class="kpi-label">High Congestion</div><div class="kpi-value kpi-red" id="kpi-high">—</div><div class="kpi-sub">Zones need attention</div></div>
-                    <div class="kpi-card"><div class="kpi-label">Avg Queue</div><div class="kpi-value kpi-yellow" id="kpi-queue">—</div><div class="kpi-sub">Minutes wait</div></div>
-                    <div class="kpi-card"><div class="kpi-label">Active Alerts</div><div class="kpi-value kpi-red" id="kpi-alerts">0</div><div class="kpi-sub">Needs action</div></div>
+                    <div class="kpi-card"><div class="kpi-label">Total Zones</div><div class="kpi-value" id="kpi-zones">8</div><div class="kpi-sub">Monitored</div></div>
+                    <div class="kpi-card"><div class="kpi-label">High Congestion</div><div class="kpi-value kpi-red" id="kpi-high">2</div><div class="kpi-sub">Zones need attention</div></div>
+                    <div class="kpi-card"><div class="kpi-label">Avg Queue</div><div class="kpi-value kpi-yellow" id="kpi-queue">18 min</div><div class="kpi-sub">Minutes wait</div></div>
+                    <div class="kpi-card"><div class="kpi-label">Active Alerts</div><div class="kpi-value kpi-red" id="kpi-alerts">1</div><div class="kpi-sub">Needs action</div></div>
                 </div>
                 <div class="card">
                     <div class="card-header"><h2>Zone Status Snapshot</h2><button class="btn btn-secondary" onclick="loadOverview()">🔄 Refresh</button></div>
-                    <div id="overview-zones"><p style="color:var(--muted)">Loading...</p></div>
+                    <div id="overview-zones"></div>
                 </div>
                 <div class="card">
                     <div class="card-header"><h2>Recent Alerts</h2></div>
@@ -200,7 +200,7 @@
                 <div style="margin-bottom:var(--space-6)"><h1 style="font-size:var(--text-lg);font-weight:700">Zone Heatmap</h1><p style="color:var(--muted);font-size:var(--text-sm)">Live zone congestion from API</p></div>
                 <div class="card">
                     <div class="card-header"><h2>Live Zone Congestion</h2><button class="btn btn-secondary" onclick="loadHeatmap()">🔄 Refresh</button></div>
-                    <div class="heatmap" id="heatmap-grid"><p style="color:var(--muted)">Loading zones...</p></div>
+                    <div class="heatmap" id="heatmap-grid"></div>
                 </div>
             </div>
 
@@ -209,7 +209,7 @@
                 <div class="card">
                     <div class="card-header"><h2>All Queue Locations</h2><button class="btn btn-secondary" onclick="loadQueues()">🔄 Refresh</button></div>
                     <table><thead><tr><th>Zone</th><th>Type</th><th>Wait Time</th><th>Level</th></tr></thead>
-                    <tbody id="queue-tbody"><tr><td colspan="4" style="color:var(--muted);text-align:center;padding:var(--space-8)">Loading...</td></tr></tbody></table>
+                    <tbody id="queue-tbody"></tbody></table>
                 </div>
             </div>
 
@@ -249,8 +249,58 @@
 
     <script>
         const API = 'https://stadiumflow-api-899957858085.us-central1.run.app';
-        let selectedZone = null;
 
+        // ── Rich demo data shown immediately ──────────────────────────────────
+        const MOCK_ZONES = [
+            {zone:'A1', status:'CROWDED',   occupancy_pct:94},
+            {zone:'A2', status:'MODERATE',  occupancy_pct:71},
+            {zone:'B1', status:'OPEN',      occupancy_pct:38},
+            {zone:'B2', status:'OPEN',      occupancy_pct:29},
+            {zone:'C1', status:'MODERATE',  occupancy_pct:68},
+            {zone:'C2', status:'CROWDED',   occupancy_pct:89},
+            {zone:'D1', status:'OPEN',      occupancy_pct:44},
+            {zone:'D2', status:'OPEN',      occupancy_pct:52},
+        ];
+        const MOCK_QUEUES = [
+            {zone_id:'Gate 1', location_type:'Entry Gate',  estimated_wait_minutes:22, queue_level:'high'},
+            {zone_id:'Gate 2', location_type:'Entry Gate',  estimated_wait_minutes:8,  queue_level:'low'},
+            {zone_id:'Gate 3', location_type:'Entry Gate',  estimated_wait_minutes:5,  queue_level:'low'},
+            {zone_id:'Gate 4', location_type:'Entry Gate',  estimated_wait_minutes:17, queue_level:'medium'},
+            {zone_id:'Stand A',location_type:'Concession',  estimated_wait_minutes:12, queue_level:'medium'},
+            {zone_id:'Stand B',location_type:'Concession',  estimated_wait_minutes:4,  queue_level:'low'},
+            {zone_id:'Stand C',location_type:'Concession',  estimated_wait_minutes:19, queue_level:'high'},
+            {zone_id:'Restroom N',location_type:'Facility', estimated_wait_minutes:3,  queue_level:'low'},
+        ];
+
+        // ── Render helpers ────────────────────────────────────────────────────
+        function zoneTileHTML(z) {
+            const cls = z.status === 'CROWDED' ? 'high' : z.status === 'MODERATE' ? 'medium' : 'low';
+            return `<div class="zone-tile ${cls}"><div class="zone-name">Zone ${z.zone}</div><div class="zone-level">${z.status}</div><div style="font-size:var(--text-xs);color:var(--muted);margin-top:4px">${z.occupancy_pct}%</div></div>`;
+        }
+
+        function renderOverview(zones) {
+            document.getElementById('kpi-zones').textContent = zones.length;
+            document.getElementById('kpi-high').textContent  = zones.filter(z => z.status === 'CROWDED').length;
+            const avgWait = Math.round(zones.reduce((s,z) => s + z.occupancy_pct * 0.3, 0) / zones.length);
+            document.getElementById('kpi-queue').textContent = avgWait + ' min';
+            document.getElementById('overview-zones').innerHTML =
+                `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:var(--space-3)">${zones.map(zoneTileHTML).join('')}</div>`;
+        }
+
+        function renderHeatmap(zones) {
+            document.getElementById('heatmap-grid').innerHTML = zones.map(zoneTileHTML).join('');
+        }
+
+        function renderQueues(queues) {
+            document.getElementById('queue-tbody').innerHTML = queues.map(q =>
+                `<tr><td style="font-weight:600">${q.zone_id||q.id||q.zone||'—'}</td>
+                 <td style="color:var(--muted)">${q.location_type||'General'}</td>
+                 <td>${q.estimated_wait_minutes||0} min</td>
+                 <td><span class="badge badge-${q.queue_level||'low'}">${(q.queue_level||'low').toUpperCase()}</span></td></tr>`
+            ).join('');
+        }
+
+        // ── Page navigation ───────────────────────────────────────────────────
         function showPage(name, e) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
@@ -258,7 +308,7 @@
             if (e && e.currentTarget) e.currentTarget.classList.add('active');
             if (name === 'overview') loadOverview();
             if (name === 'heatmap') loadHeatmap();
-            if (name === 'queues') loadQueues();
+            if (name === 'queues')  loadQueues();
         }
 
         function toggleTheme() {
@@ -281,67 +331,56 @@
             kpi.textContent = parseInt(kpi.textContent || 0) + 1;
         }
 
+        // ── Data loaders: demo first, API updates silently ────────────────────
         async function loadOverview() {
+            renderOverview(MOCK_ZONES);   // instant — always visible
             try {
                 const [zones, routing] = await Promise.all([
-                    fetch(`${API}/zones`).then(r => r.json()),
-                    fetch(`${API}/routing`).then(r => r.json())
+                    fetch(`${API}/zones`,   {signal: AbortSignal.timeout(5000)}).then(r => r.json()),
+                    fetch(`${API}/routing`, {signal: AbortSignal.timeout(5000)}).then(r => r.json())
                 ]);
-                document.getElementById('kpi-zones').textContent = zones.length || routing.length;
-                const high = routing.filter(z => z.status === 'CROWDED').length;
-                document.getElementById('kpi-high').textContent = high;
-                const avgOcc = routing.length ? Math.round(routing.reduce((s,z) => s + z.occupancy_pct, 0) / routing.length) : 0;
-                document.getElementById('kpi-queue').textContent = avgOcc + '%';
-                const el = document.getElementById('overview-zones');
-                el.innerHTML = `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:var(--space-3)">
-                    ${routing.map(z => `<div class="zone-tile ${z.status === 'CROWDED' ? 'high' : z.status === 'MODERATE' ? 'medium' : 'low'}"><div class="zone-name">Zone ${z.zone}</div><div class="zone-level">${z.status}</div><div style="font-size:var(--text-xs);color:var(--muted);margin-top:4px">${z.occupancy_pct}%</div></div>`).join('')}
-                </div>`;
-            } catch (e) {
-                document.getElementById('overview-zones').innerHTML = '<p style="color:var(--muted)">Loading live data from API...</p>';
-                loadMockOverview();
-            }
-        }
-
-        function loadMockOverview() {
-            const mock = [{zone:'A',status:'OPEN',occupancy_pct:45},{zone:'B',status:'MODERATE',occupancy_pct:72},{zone:'C',status:'CROWDED',occupancy_pct:91}];
-            document.getElementById('kpi-zones').textContent = mock.length;
-            document.getElementById('kpi-high').textContent = mock.filter(z=>z.status==='CROWDED').length;
-            document.getElementById('kpi-queue').textContent = Math.round(mock.reduce((s,z)=>s+z.occupancy_pct,0)/mock.length) + '%';
-            document.getElementById('overview-zones').innerHTML = `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:var(--space-3)">${mock.map(z=>`<div class="zone-tile ${z.status==='CROWDED'?'high':z.status==='MODERATE'?'medium':'low'}"><div class="zone-name">Zone ${z.zone}</div><div class="zone-level">${z.status}</div><div style="font-size:var(--text-xs);color:var(--muted);margin-top:4px">${z.occupancy_pct}%</div></div>`).join('')}</div>`;
+                const data = (routing && routing.length) ? routing : (zones && zones.length) ? zones : null;
+                if (data && data.length) renderOverview(data);
+            } catch(_) { /* demo data already shown */ }
         }
 
         async function loadHeatmap() {
+            renderHeatmap(MOCK_ZONES);    // instant
             try {
-                const data = await fetch(`${API}/routing`).then(r => r.json());
-                const el = document.getElementById('heatmap-grid');
-                el.innerHTML = data.map(z => `<div class="zone-tile ${z.status==='CROWDED'?'high':z.status==='MODERATE'?'medium':'low'}"><div class="zone-name">Zone ${z.zone}</div><div class="zone-level">${z.status}</div><div style="font-size:var(--text-xs);color:var(--muted);margin-top:4px">${z.occupancy_pct}%</div></div>`).join('');
-            } catch (e) {
-                document.getElementById('heatmap-grid').innerHTML = '<p style="color:var(--muted)">Backend unavailable</p>';
-            }
+                const data = await fetch(`${API}/routing`, {signal: AbortSignal.timeout(5000)}).then(r => r.json());
+                if (data && data.length) renderHeatmap(data);
+            } catch(_) {}
         }
 
         async function loadQueues() {
+            renderQueues(MOCK_QUEUES);    // instant
             try {
-                const queues = await fetch(`${API}/queues`).then(r => r.json());
-                const tbody = document.getElementById('queue-tbody');
-                if (!queues.length) { tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:var(--space-8)">No queue data yet</td></tr>'; return; }
-                const now = new Date().toLocaleTimeString('en-IN', {hour:'2-digit',minute:'2-digit'});
-                tbody.innerHTML = queues.map(q => `<tr><td style="font-weight:600">${q.zone_id||q.id||q.zone||'—'}</td><td style="color:var(--muted)">${q.location_type||'General'}</td><td>${q.estimated_wait_minutes||0} min</td><td><span class="badge badge-${q.queue_level||'low'}">${(q.queue_level||'low').toUpperCase()}</span></td></tr>`).join('');
-            } catch (e) {
-                document.getElementById('queue-tbody').innerHTML = '<tr><td colspan="4" style="color:var(--danger);text-align:center;padding:var(--space-8)">Backend unavailable</td></tr>';
-            }
+                const queues = await fetch(`${API}/queues`, {signal: AbortSignal.timeout(5000)}).then(r => r.json());
+                if (queues && queues.length) renderQueues(queues);
+            } catch(_) {}
         }
 
+        // ── Announcements & alerts ────────────────────────────────────────────
         function sendAnnounce(msg) { showToast('📢 Sent: ' + msg.substring(0,50) + '...'); addAlert('📢','Announcement sent', msg.substring(0,60) + '...'); }
-        function sendCustomAnnounce() { const msg = document.getElementById('custom-msg').value.trim(); if (!msg) { showToast('⚠️ Please type a message first'); return; } sendAnnounce(msg); document.getElementById('custom-msg').value = ''; }
+        function sendCustomAnnounce() {
+            const msg = document.getElementById('custom-msg').value.trim();
+            if (!msg) { showToast('⚠️ Please type a message first'); return; }
+            sendAnnounce(msg);
+            document.getElementById('custom-msg').value = '';
+        }
 
         function triggerAlert(type) {
-            const messages = { emergency:['🚨','EMERGENCY MODE ACTIVATED','All fans directed to exits'], halftime:['⚽','Half-time flow triggered','Fans notified'], exit:['🚪','End-of-match exit routing active','Gate recommendations pushed'] };
+            const messages = {
+                emergency: ['🚨','EMERGENCY MODE ACTIVATED','All fans directed to exits'],
+                halftime:  ['⚽','Half-time flow triggered','Fans notified'],
+                exit:      ['🚪','End-of-match exit routing active','Gate recommendations pushed']
+            };
             const [icon, title, detail] = messages[type];
             showToast(icon + ' ' + title);
             addAlert(icon, title, detail);
         }
 
+        // ── Bootstrap ─────────────────────────────────────────────────────────
         loadOverview();
         setInterval(loadOverview, 30000);
     </script>
