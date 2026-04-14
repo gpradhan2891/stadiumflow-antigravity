@@ -134,6 +134,54 @@
         .toast.show { transform: translateY(0); }
 
         @media (max-width: 768px) { .layout { grid-template-columns: 1fr; } .sidebar { display: none; } .heatmap { grid-template-columns: repeat(2, 1fr); } .announce-grid { grid-template-columns: 1fr; } }
+
+        /* ── HERO GRID: stat chips ───────────────────────────────────────── */
+        .hero-stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:var(--space-3); margin:var(--space-4) 0; }
+        .stat-chip  { background:var(--surface-2); border:1px solid var(--border); border-radius:var(--radius-lg); padding:var(--space-4); }
+        .stat-chip .lbl { display:block; font-size:var(--text-xs); color:var(--muted); margin-bottom:4px; text-transform:uppercase; letter-spacing:.05em; }
+        .stat-chip .val { font-size:var(--text-xl); font-weight:700; font-variant-numeric:tabular-nums; }
+        .val-ok  { color:var(--success); }
+        .val-wn  { color:var(--warning); }
+        .val-er  { color:var(--danger);  }
+        .val-ac  { color:var(--accent);  }
+
+        /* ── HERO GRID: gate & zone cards ────────────────────────────────── */
+        .status-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(178px,1fr)); gap:var(--space-3); margin-top:var(--space-4); }
+        .status-card { background:var(--surface-2); border:1px solid var(--border); border-radius:var(--radius-lg); padding:var(--space-4); transition:box-shadow 180ms ease; }
+        .status-card:hover { box-shadow:0 4px 16px rgba(0,0,0,.25); }
+        .status-card h3 { font-size:var(--text-sm); font-weight:700; margin-bottom:var(--space-2); display:flex; align-items:center; gap:6px; }
+        .status-card p  { font-size:var(--text-xs); color:var(--muted); margin-top:3px; }
+
+        /* Left-border + badge colour coding (Change 1) */
+        .sc-open     { border-left:3px solid var(--success); }
+        .sc-moderate { border-left:3px solid var(--warning); }
+        .sc-crowded  { border-left:3px solid var(--danger);  }
+        .sc-low      { border-left:3px solid var(--success); }
+        .sc-medium   { border-left:3px solid var(--warning); }
+        .sc-high     { border-left:3px solid var(--danger);  }
+
+        /* Status dot */
+        .zdot { width:8px; height:8px; border-radius:50%; display:inline-block; flex-shrink:0; }
+        .zdot-open     { background:var(--success); }
+        .zdot-moderate { background:var(--warning); }
+        .zdot-crowded  { background:var(--danger);  }
+
+        /* Badges (override / extend existing) */
+        .badge-open     { background:oklch(from var(--success) l c h / 0.15); color:var(--success); border:1px solid oklch(from var(--success) l c h / 0.3); }
+        .badge-moderate { background:oklch(from var(--warning) l c h / 0.15); color:var(--warning); border:1px solid oklch(from var(--warning) l c h / 0.3); }
+        .badge-crowded  { background:oklch(from var(--danger)  l c h / 0.15); color:var(--danger);  border:1px solid oklch(from var(--danger)  l c h / 0.3); }
+
+        /* Occupancy bar */
+        .occ-bar  { height:5px; background:var(--surface-2); border-radius:var(--radius-full); margin-top:var(--space-3); overflow:hidden; }
+        .occ-fill { height:100%; border-radius:var(--radius-full); transition:width .55s ease; }
+        .of-ok { background:var(--success); }
+        .of-wn { background:var(--warning); }
+        .of-er { background:var(--danger);  }
+
+        /* Section divider label */
+        .sdiv { font-size:var(--text-sm); font-weight:700; margin:var(--space-6) 0 var(--space-3); display:flex; align-items:center; gap:var(--space-3); }
+        .sdiv::after { content:''; flex:1; height:1px; background:var(--border); }
+        .tag-new { background:oklch(from var(--success) l c h / 0.15); color:var(--success); font-size:var(--text-xs); padding:1px 8px; border-radius:var(--radius-full); font-weight:600; }
     </style>
 </head>
 
@@ -182,9 +230,23 @@
                     <div class="kpi-card"><div class="kpi-label">Avg Queue</div><div class="kpi-value kpi-yellow" id="kpi-queue">18 min</div><div class="kpi-sub">Minutes wait</div></div>
                     <div class="kpi-card"><div class="kpi-label">Active Alerts</div><div class="kpi-value kpi-red" id="kpi-alerts">1</div><div class="kpi-sub">Needs action</div></div>
                 </div>
+                <!-- CHANGE 2: Gate hero grid (new) -->
                 <div class="card">
-                    <div class="card-header"><h2>Zone Status Snapshot</h2><button class="btn btn-secondary" onclick="loadOverview()">🔄 Refresh</button></div>
-                    <div id="overview-zones"></div>
+                    <div class="card-header">
+                        <h2>🚪 Gate Status <span class="tag-new" style="margin-left:8px">LIVE</span></h2>
+                        <button class="btn btn-secondary" onclick="loadOverview()">🔄 Refresh</button>
+                    </div>
+                    <div class="status-grid" id="overview-gates">
+                        <p style="color:var(--muted)">Loading gates…</p>
+                    </div>
+                </div>
+
+                <!-- CHANGE 1+2: Zone hero grid (colour coded) -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2>📍 Zone Occupancy <span class="tag-new" style="margin-left:8px">LIVE</span></h2>
+                    </div>
+                    <div class="status-grid" id="overview-zones"></div>
                 </div>
                 <div class="card">
                     <div class="card-header"><h2>Recent Alerts</h2></div>
@@ -272,10 +334,72 @@
             {zone_id:'Restroom N',location_type:'Facility', estimated_wait_minutes:3,  queue_level:'low'},
         ];
 
-        // ── Render helpers ────────────────────────────────────────────────────
+
+        // ── CHANGE 1: colour helpers ──────────────────────────────────────────
+        function zoneColorClass(status) {
+            const s = (status || '').toUpperCase();
+            return s === 'CROWDED' ? 'crowded' : s === 'MODERATE' ? 'moderate' : 'open';
+        }
+        function gateColorClass(level) {
+            const l = (level || '').toLowerCase();
+            return l === 'high' ? 'high' : l === 'medium' ? 'medium' : 'low';
+        }
+        function occFillClass(pct) { return pct >= 80 ? 'of-er' : pct >= 60 ? 'of-wn' : 'of-ok'; }
+        function occBar(pct) {
+            return `<div class="occ-bar"><div class="occ-fill ${occFillClass(pct)}" style="width:${pct}%"></div></div>`;
+        }
+
+        // ── CHANGE 2: hero stat strip ─────────────────────────────────────────
+        function renderHeroStats(el, zones, gates) {
+            const crowded = zones.filter(z => z.status === 'CROWDED').length;
+            const open    = zones.filter(z => z.status === 'OPEN').length;
+            const best    = [...gates].sort((a,b) => a.estimated_wait_minutes - b.estimated_wait_minutes)[0];
+            el.innerHTML = [
+                `<div class="stat-chip"><span class="lbl">Total Zones</span><span class="val">${zones.length}</span></div>`,
+                `<div class="stat-chip"><span class="lbl">Crowded</span><span class="val val-er">${crowded}</span></div>`,
+                `<div class="stat-chip"><span class="lbl">Open</span><span class="val val-ok">${open}</span></div>`,
+                `<div class="stat-chip"><span class="lbl">Best Gate</span><span class="val val-ac">${best ? best.zone_id : '—'}</span></div>`,
+            ].join('');
+        }
+
+        // ── CHANGE 2: gate cards ─────────────────────────────────────────────
+        function renderHeroGates(el, gates) {
+            const sorted = [...gates].sort((a,b) => a.estimated_wait_minutes - b.estimated_wait_minutes);
+            el.innerHTML = sorted.map((g,i) => {
+                const cls = gateColorClass(g.queue_level);
+                return `<div class="status-card sc-${cls}" data-gate="${g.zone_id}">
+                    <h3>${g.zone_id}${i===0?' ⭐':''}</h3>
+                    <span class="badge badge-${cls}">${cls.toUpperCase()}</span>
+                    <p>Wait: <strong>${g.estimated_wait_minutes} min</strong></p>
+                    <p>${g.location_type}</p>
+                    ${occBar(g.estimated_wait_minutes / 30 * 100)}
+                </div>`;
+            }).join('');
+        }
+
+        // ── CHANGE 1+2: zone cards ───────────────────────────────────────────
+        function renderHeroZones(el, zones) {
+            el.innerHTML = zones.map(z => {
+                const cls = zoneColorClass(z.status);
+                return `<div class="status-card sc-${cls}" data-zone="${z.zone}">
+                    <h3><span class="zdot zdot-${cls}"></span>Zone ${z.zone}</h3>
+                    <span class="badge badge-${cls}">${z.status}</span>
+                    <p>Occupancy: <strong>${z.occupancy_pct}%</strong></p>
+                    <p>Capacity: ${z.capacity || 500}</p>
+                    ${occBar(z.occupancy_pct)}
+                </div>`;
+            }).join('');
+        }
+
+        // ── Render helpers (updated with Change 1 + 2) ───────────────────────
         function zoneTileHTML(z) {
-            const cls = z.status === 'CROWDED' ? 'high' : z.status === 'MODERATE' ? 'medium' : 'low';
-            return `<div class="zone-tile ${cls}"><div class="zone-name">Zone ${z.zone}</div><div class="zone-level">${z.status}</div><div style="font-size:var(--text-xs);color:var(--muted);margin-top:4px">${z.occupancy_pct}%</div></div>`;
+            const cls = zoneColorClass(z.status);
+            return `<div class="zone-tile ${cls === 'crowded' ? 'high' : cls === 'moderate' ? 'medium' : 'low'}">
+                <div class="zone-name">Zone ${z.zone}</div>
+                <span class="badge badge-${cls}" style="margin-top:4px">${z.status}</span>
+                <div style="font-size:var(--text-xs);color:var(--muted);margin-top:4px">${z.occupancy_pct}%</div>
+                ${occBar(z.occupancy_pct)}
+            </div>`;
         }
 
         function renderOverview(zones) {
@@ -283,8 +407,11 @@
             document.getElementById('kpi-high').textContent  = zones.filter(z => z.status === 'CROWDED').length;
             const avgWait = Math.round(zones.reduce((s,z) => s + z.occupancy_pct * 0.3, 0) / zones.length);
             document.getElementById('kpi-queue').textContent = avgWait + ' min';
-            document.getElementById('overview-zones').innerHTML =
-                `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:var(--space-3)">${zones.map(zoneTileHTML).join('')}</div>`;
+            // Colour-coded zone cards (Change 1 + 2)
+            renderHeroZones(document.getElementById('overview-zones'), zones);
+            // Gate cards from MOCK_QUEUES
+            const gates = MOCK_QUEUES.filter(q => q.location_type === 'Entry Gate');
+            renderHeroGates(document.getElementById('overview-gates'), gates);
         }
 
         function renderHeatmap(zones) {
@@ -335,12 +462,19 @@
         async function loadOverview() {
             renderOverview(MOCK_ZONES);   // instant — always visible
             try {
-                const [zones, routing] = await Promise.all([
-                    fetch(`${API}/zones`,   {signal: AbortSignal.timeout(5000)}).then(r => r.json()),
-                    fetch(`${API}/routing`, {signal: AbortSignal.timeout(5000)}).then(r => r.json())
+                const [zones, queues] = await Promise.all([
+                    fetch(`${API}/zones`,  {signal: AbortSignal.timeout(5000)}).then(r => r.json()),
+                    fetch(`${API}/queues`, {signal: AbortSignal.timeout(5000)}).then(r => r.json()),
                 ]);
-                const data = (routing && routing.length) ? routing : (zones && zones.length) ? zones : null;
-                if (data && data.length) renderOverview(data);
+                if (zones && zones.length) {
+                    renderHeroZones(document.getElementById('overview-zones'), zones);
+                    document.getElementById('kpi-zones').textContent = zones.length;
+                    document.getElementById('kpi-high').textContent  = zones.filter(z=>z.status==='CROWDED').length;
+                }
+                if (queues && queues.length) {
+                    const liveGates = queues.filter(q=>(q.location_type||'').includes('Entry'));
+                    if (liveGates.length) renderHeroGates(document.getElementById('overview-gates'), liveGates);
+                }
             } catch(_) { /* demo data already shown */ }
         }
 

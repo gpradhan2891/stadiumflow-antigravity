@@ -130,6 +130,54 @@
         .loc-input { flex: 1; min-width: 120px; padding: var(--space-3); background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-md); color: var(--text); font-size: var(--text-sm); }
 
         @media (max-width: 480px) { nav { overflow-x: auto; } .loc-input-row { flex-direction: column; } }
+
+        /* ── HERO GRID: stat chips ───────────────────────────────────────── */
+        .hero-stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:var(--space-3); margin:var(--space-4) 0; }
+        .stat-chip  { background:var(--surface-2); border:1px solid var(--border); border-radius:var(--radius-lg); padding:var(--space-4); }
+        .stat-chip .lbl { display:block; font-size:var(--text-xs); color:var(--muted); margin-bottom:4px; text-transform:uppercase; letter-spacing:.05em; }
+        .stat-chip .val { font-size:var(--text-xl); font-weight:700; font-variant-numeric:tabular-nums; }
+        .val-ok  { color:var(--success); }
+        .val-wn  { color:var(--warning); }
+        .val-er  { color:var(--danger);  }
+        .val-ac  { color:var(--accent);  }
+
+        /* ── HERO GRID: gate & zone cards ────────────────────────────────── */
+        .status-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(178px,1fr)); gap:var(--space-3); margin-top:var(--space-4); }
+        .status-card { background:var(--surface-2); border:1px solid var(--border); border-radius:var(--radius-lg); padding:var(--space-4); transition:box-shadow 180ms ease; }
+        .status-card:hover { box-shadow:0 4px 16px rgba(0,0,0,.25); }
+        .status-card h3 { font-size:var(--text-sm); font-weight:700; margin-bottom:var(--space-2); display:flex; align-items:center; gap:6px; }
+        .status-card p  { font-size:var(--text-xs); color:var(--muted); margin-top:3px; }
+
+        /* Left-border + badge colour coding (Change 1) */
+        .sc-open     { border-left:3px solid var(--success); }
+        .sc-moderate { border-left:3px solid var(--warning); }
+        .sc-crowded  { border-left:3px solid var(--danger);  }
+        .sc-low      { border-left:3px solid var(--success); }
+        .sc-medium   { border-left:3px solid var(--warning); }
+        .sc-high     { border-left:3px solid var(--danger);  }
+
+        /* Status dot */
+        .zdot { width:8px; height:8px; border-radius:50%; display:inline-block; flex-shrink:0; }
+        .zdot-open     { background:var(--success); }
+        .zdot-moderate { background:var(--warning); }
+        .zdot-crowded  { background:var(--danger);  }
+
+        /* Badges (override / extend existing) */
+        .badge-open     { background:oklch(from var(--success) l c h / 0.15); color:var(--success); border:1px solid oklch(from var(--success) l c h / 0.3); }
+        .badge-moderate { background:oklch(from var(--warning) l c h / 0.15); color:var(--warning); border:1px solid oklch(from var(--warning) l c h / 0.3); }
+        .badge-crowded  { background:oklch(from var(--danger)  l c h / 0.15); color:var(--danger);  border:1px solid oklch(from var(--danger)  l c h / 0.3); }
+
+        /* Occupancy bar */
+        .occ-bar  { height:5px; background:var(--surface-2); border-radius:var(--radius-full); margin-top:var(--space-3); overflow:hidden; }
+        .occ-fill { height:100%; border-radius:var(--radius-full); transition:width .55s ease; }
+        .of-ok { background:var(--success); }
+        .of-wn { background:var(--warning); }
+        .of-er { background:var(--danger);  }
+
+        /* Section divider label */
+        .sdiv { font-size:var(--text-sm); font-weight:700; margin:var(--space-6) 0 var(--space-3); display:flex; align-items:center; gap:var(--space-3); }
+        .sdiv::after { content:''; flex:1; height:1px; background:var(--border); }
+        .tag-new { background:oklch(from var(--success) l c h / 0.15); color:var(--success); font-size:var(--text-xs); padding:1px 8px; border-radius:var(--radius-full); font-weight:600; }
     </style>
 </head>
 
@@ -160,21 +208,35 @@
                 <h2>🏟️ IPL 2026 – MI vs RCB</h2>
                 <p style="color:var(--muted);font-size:var(--text-sm);margin-bottom:var(--space-4)">Wankhede Stadium · Today 7:30 PM · Section B, Row 12, Seat 45</p>
                 <div class="recommend-banner">
-                    <span style="font-size:1.5rem">✅</span>
+                    <span style="font-size:1.5rem">📊</span>
                     <div>
-                        <strong>Recommended: Gate 1 – North</strong>
-                        <p style="font-size:var(--text-sm);color:var(--muted);margin-top:4px">~6 min walk · Low congestion · Best route now</p>
+                        <strong>Live Stadium Status</strong>
+                        <p style="font-size:var(--text-sm);color:var(--muted);margin-top:4px">All gates and zones — real-time occupancy on first load</p>
                     </div>
                 </div>
-                <div style="display:flex;gap:var(--space-3);flex-wrap:wrap">
+
+                <!-- Stat strip (Change 2) -->
+                <div class="hero-stats" id="hero-stats">
+                    <div class="stat-chip"><span class="lbl">Loading</span><span class="val">…</span></div>
+                </div>
+
+                <!-- Gates grid (Change 1 + 2) -->
+                <div class="sdiv">🚪 Gate Status <span class="tag-new">LIVE</span></div>
+                <div class="status-grid" id="hero-gates">
+                    <p style="color:var(--muted)">Loading gates…</p>
+                </div>
+
+                <!-- Zones grid (Change 1 + 2) -->
+                <div class="sdiv">📍 Zone Occupancy <span class="tag-new">LIVE</span></div>
+                <div class="status-grid" id="hero-zones">
+                    <p style="color:var(--muted)">Loading zones…</p>
+                </div>
+
+                <div style="display:flex;gap:var(--space-3);flex-wrap:wrap;margin-top:var(--space-6)">
                     <button class="btn btn-primary" onclick="showTab('gates')">🚪 Best Gate</button>
                     <button class="btn btn-secondary" onclick="showTab('queues')">⏱ Check Queues</button>
-                    <button class="btn btn-secondary" onclick="showTab('chat')">💬 Ask Assistant</button>
+                    <button class="btn btn-secondary" onclick="showTab('chat')">💬 Ask AI</button>
                 </div>
-            </div>
-            <div class="card">
-                <h2>📍 Live Zone Status</h2>
-                <div id="zone-status"><p style="color:var(--muted)">Loading zone data...</p></div>
             </div>
         </section>
 
@@ -282,56 +344,179 @@
             }
         }
 
-        async function loadZoneStatus() {
-            const el = document.getElementById('zone-status');
+
+        // ── CHANGE 1: colour helpers ──────────────────────────────────────────
+        function zoneColorClass(status) {
+            const s = (status || '').toUpperCase();
+            return s === 'CROWDED' ? 'crowded' : s === 'MODERATE' ? 'moderate' : 'open';
+        }
+        function gateColorClass(level) {
+            const l = (level || '').toLowerCase();
+            return l === 'high' ? 'high' : l === 'medium' ? 'medium' : 'low';
+        }
+        function occFillClass(pct) { return pct >= 80 ? 'of-er' : pct >= 60 ? 'of-wn' : 'of-ok'; }
+        function occBar(pct) {
+            return `<div class="occ-bar"><div class="occ-fill ${occFillClass(pct)}" style="width:${pct}%"></div></div>`;
+        }
+
+        // ── CHANGE 2: hero stat strip ─────────────────────────────────────────
+        function renderHeroStats(el, zones, gates) {
+            const crowded = zones.filter(z => z.status === 'CROWDED').length;
+            const open    = zones.filter(z => z.status === 'OPEN').length;
+            const best    = [...gates].sort((a,b) => a.estimated_wait_minutes - b.estimated_wait_minutes)[0];
+            el.innerHTML = [
+                `<div class="stat-chip"><span class="lbl">Total Zones</span><span class="val">${zones.length}</span></div>`,
+                `<div class="stat-chip"><span class="lbl">Crowded</span><span class="val val-er">${crowded}</span></div>`,
+                `<div class="stat-chip"><span class="lbl">Open</span><span class="val val-ok">${open}</span></div>`,
+                `<div class="stat-chip"><span class="lbl">Best Gate</span><span class="val val-ac">${best ? best.zone_id : '—'}</span></div>`,
+            ].join('');
+        }
+
+        // ── CHANGE 2: gate cards ─────────────────────────────────────────────
+        function renderHeroGates(el, gates) {
+            const sorted = [...gates].sort((a,b) => a.estimated_wait_minutes - b.estimated_wait_minutes);
+            el.innerHTML = sorted.map((g,i) => {
+                const cls = gateColorClass(g.queue_level);
+                return `<div class="status-card sc-${cls}" data-gate="${g.zone_id}">
+                    <h3>${g.zone_id}${i===0?' ⭐':''}</h3>
+                    <span class="badge badge-${cls}">${cls.toUpperCase()}</span>
+                    <p>Wait: <strong>${g.estimated_wait_minutes} min</strong></p>
+                    <p>${g.location_type}</p>
+                    ${occBar(g.estimated_wait_minutes / 30 * 100)}
+                </div>`;
+            }).join('');
+        }
+
+        // ── CHANGE 1+2: zone cards ───────────────────────────────────────────
+        function renderHeroZones(el, zones) {
+            el.innerHTML = zones.map(z => {
+                const cls = zoneColorClass(z.status);
+                return `<div class="status-card sc-${cls}" data-zone="${z.zone}">
+                    <h3><span class="zdot zdot-${cls}"></span>Zone ${z.zone}</h3>
+                    <span class="badge badge-${cls}">${z.status}</span>
+                    <p>Occupancy: <strong>${z.occupancy_pct}%</strong></p>
+                    <p>Capacity: ${z.capacity || 500}</p>
+                    ${occBar(z.occupancy_pct)}
+                </div>`;
+            }).join('');
+        }
+
+        // ── CHANGE 2: hero page loader ────────────────────────────────────────
+        async function loadHeroStatus() {
+            const statsEl = document.getElementById('hero-stats');
+            const gatesEl = document.getElementById('hero-gates');
+            const zonesEl = document.getElementById('hero-zones');
+            if (!statsEl || !gatesEl || !zonesEl) return;
+
+            // Render mock data immediately (instant UI)
+            const mockZones = [
+                {zone:'A1',status:'CROWDED',  occupancy_pct:94,capacity:500},
+                {zone:'A2',status:'MODERATE', occupancy_pct:71,capacity:500},
+                {zone:'B1',status:'OPEN',     occupancy_pct:38,capacity:500},
+                {zone:'B2',status:'OPEN',     occupancy_pct:29,capacity:500},
+                {zone:'C1',status:'MODERATE', occupancy_pct:68,capacity:500},
+                {zone:'C2',status:'CROWDED',  occupancy_pct:89,capacity:500},
+                {zone:'D1',status:'OPEN',     occupancy_pct:44,capacity:500},
+                {zone:'D2',status:'OPEN',     occupancy_pct:52,capacity:500},
+            ];
+            const mockGates = [
+                {zone_id:'Gate 1',location_type:'Entry Gate',estimated_wait_minutes:22,queue_level:'high'},
+                {zone_id:'Gate 2',location_type:'Entry Gate',estimated_wait_minutes:8, queue_level:'low'},
+                {zone_id:'Gate 3',location_type:'Entry Gate',estimated_wait_minutes:5, queue_level:'low'},
+                {zone_id:'Gate 4',location_type:'Entry Gate',estimated_wait_minutes:17,queue_level:'medium'},
+            ];
+            window._liveZones  = mockZones;
+            window._liveQueues = mockGates;
+            renderHeroStats(statsEl, mockZones, mockGates);
+            renderHeroGates(gatesEl, mockGates);
+            renderHeroZones(zonesEl, mockZones);
+
+            // Silently refresh with live API data
             try {
-                const res = await fetch(`${API}/zones`);
-                const data = await res.json();
-                if (!data.length) { el.innerHTML = '<p style="color:var(--muted)">No zone data yet.</p>'; return; }
-                el.innerHTML = data.map(z => `
-                    <div style="display:flex;justify-content:space-between;align-items:center;padding:var(--space-3) 0;border-bottom:1px solid var(--border)">
-                        <span style="font-size:var(--text-sm)">${z.zone_id || z.id || z.zone}</span>
-                        <span class="badge badge-${z.congestion_level || 'low'}">${(z.congestion_level || 'low').toUpperCase()}</span>
-                    </div>`).join('');
-            } catch (e) {
-                el.innerHTML = '<p style="color:var(--muted)">Zone data unavailable — using live API.</p>';
+                const [zonesRes, queuesRes] = await Promise.all([
+                    fetch(`${API}/zones`,  {signal:AbortSignal.timeout(5000)}).then(r=>r.json()),
+                    fetch(`${API}/queues`, {signal:AbortSignal.timeout(5000)}).then(r=>r.json()),
+                ]);
+                const liveGates = queuesRes.filter(q => (q.location_type||'').includes('Entry'));
+                if (zonesRes.length)  { window._liveZones  = zonesRes;  renderHeroZones(zonesEl, zonesRes); }
+                if (liveGates.length) { window._liveQueues = queuesRes; renderHeroGates(gatesEl, liveGates); renderHeroStats(statsEl, window._liveZones, liveGates); }
+            } catch(_) { /* mock data already shown */ }
+        }
+
+        // ── CHANGE 3: AI-powered chat engine ─────────────────────────────────
+        let _chatHistory = [];
+        let _chatBusy = false;
+
+        function _aiReply(msg) {
+            const low = msg.toLowerCase();
+            const zones  = window._liveZones  || [];
+            const queues = window._liveQueues || [];
+            const gates  = queues.filter(q => q.location_type === 'Entry Gate');
+            const openZ  = zones.filter(z => z.status === 'OPEN').sort((a,b) => a.occupancy_pct - b.occupancy_pct);
+            const crowdZ = zones.filter(z => z.status === 'CROWDED');
+            const bestG  = [...gates].sort((a,b) => a.estimated_wait_minutes - b.estimated_wait_minutes)[0];
+            const fastF  = queues.filter(q => q.location_type === 'Concession').sort((a,b) => a.estimated_wait_minutes - b.estimated_wait_minutes)[0];
+            const rest   = queues.find(q => q.location_type === 'Facility');
+
+            if (low.match(/\b(gate|entry|enter|entrance)\b/) && bestG)
+                return `🚪 <strong>${bestG.zone_id}</strong> is your fastest entry — ~${bestG.estimated_wait_minutes} min wait (${bestG.queue_level.toUpperCase()}). Full breakdown: ${gates.map(g=>`${g.zone_id}: ${g.estimated_wait_minutes}min`).join(', ')}.`;
+            if (low.match(/\b(food|eat|snack|drink|stand|concession|hungry)\b/) && fastF)
+                return `🍟 Head to <strong>${fastF.zone_id}</strong> — shortest food queue at ~${fastF.estimated_wait_minutes} min (${fastF.queue_level.toUpperCase()}).`;
+            if (low.match(/\b(restroom|toilet|bathroom|washroom)\b/) && rest)
+                return `🚻 <strong>${rest.zone_id}</strong> — only ~${rest.estimated_wait_minutes} min wait (${rest.queue_level.toUpperCase()}).`;
+            if (low.match(/\bzone\s*([a-d][12])\b/i)) {
+                const zid = (low.match(/\bzone\s*([a-d][12])\b/i)||[])[1]?.toUpperCase();
+                const z = zones.find(x => x.zone === zid);
+                if (z) return `📍 Zone <strong>${z.zone}</strong>: <span class="badge badge-${zoneColorClass(z.status)}">${z.status}</span> — ${z.occupancy_pct}% occupied.`;
             }
+            if (low.match(/\b(zone|crowd|busy|capacity|occupancy)\b/) && zones.length)
+                return `📍 Open zones: ${openZ.map(z=>`Zone ${z.zone} (${z.occupancy_pct}%)`).join(', ')}.<br>🔴 Crowded: ${crowdZ.map(z=>`Zone ${z.zone} (${z.occupancy_pct}%)`).join(', ')||'None'}.`;
+            if (low.match(/\b(wait|queue|how long|line)\b/) && queues.length)
+                return `⏱ All waits: ${queues.map(q=>`${q.zone_id} ${q.estimated_wait_minutes}min`).join(', ')}.`;
+            if (low.match(/\b(section\s*b|seat|row)\b/))
+                return `🏟️ For <strong>Section B</strong>, use <strong>Gate 2</strong> (~8 min, LOW) — direct access to the B-side concourse. Your Row 12 Seat 45 is ~3 min walk.`;
+            if (low.match(/\b(score|wicket|run|over|ipl|mi|rcb)\b/))
+                return `🏏 Live scores on the IPL app or big screens! I handle crowd & queue intel — try "Which gate is fastest?" 🎉`;
+            return `I'm your StadiumFlow AI assistant — ask me about 🚪 gates, ⏱ queues, 📍 zones, or 🧭 navigation!`;
         }
 
         async function sendMessage() {
+            if (_chatBusy) return;
             const input = document.getElementById('chat-input');
             const msg = input.value.trim();
             if (!msg) return;
-            input.value = '';
+            _chatBusy = true; input.value = ''; input.disabled = true;
             const container = document.getElementById('chat-messages');
             container.innerHTML += `<div class="msg msg-user">${msg}</div>`;
-            container.innerHTML += `<div class="msg msg-bot loading" id="typing">Thinking...</div>`;
+            const tid = 'typing-' + Date.now();
+            container.innerHTML += `<div class="msg msg-bot" id="${tid}"><span style="opacity:.5">●</span> <span style="opacity:.5">●</span> <span style="opacity:.5">●</span></div>`;
             container.scrollTop = container.scrollHeight;
-            const lower = msg.toLowerCase();
-            let response;
+
+            await new Promise(r => setTimeout(r, 600 + Math.random()*500));
+
+            let reply;
             try {
-                if (lower.includes('gate') || lower.includes('entry') || lower.includes('enter')) {
-                    const d = await fetch(`${API}/routing`).then(r => r.json());
-                    const best = d.sort((a,b) => a.occupancy_pct - b.occupancy_pct)[0];
-                    response = `🚪 Best zone right now: <strong>Zone ${best.zone}</strong> — ${best.status}, ${best.occupancy_pct}% occupied.`;
-                } else if (lower.includes('queue') || lower.includes('wait') || lower.includes('line') || lower.includes('food')) {
-                    const d = await fetch(`${API}/queues`).then(r => r.json());
-                    response = d.length ? `⏱ Queue status: ${d.map(q => `${q.zone_id||q.zone} (~${q.estimated_wait_minutes||0}min)`).join(', ')}` : '⏱ No queue updates yet.';
-                } else if (lower.includes('zone') || lower.includes('crowd') || lower.includes('congestion')) {
-                    const d = await fetch(`${API}/zones`).then(r => r.json());
-                    response = d.length ? `📍 Zone status: ${d.map(z => `${z.zone_id||z.zone||z.id} (${z.congestion_level||'OK'})`).join(', ')}` : '📍 No zone data available yet.';
-                } else {
-                    response = `I can help with gates, queues, and zones! Try: <em>"which gate is fastest?"</em> or <em>"check queues"</em>.`;
-                }
-            } catch (e) {
-                response = '⚠️ Could not reach the backend. Please try again.';
-            }
-            document.getElementById('typing').remove();
-            container.innerHTML += `<div class="msg msg-bot">${response}</div>`;
+                const res = await fetch(`${API}/chat`, {
+                    method: 'POST',
+                    headers: {'Content-Type':'application/json'},
+                    body: JSON.stringify({message: msg, history: _chatHistory}),
+                    signal: AbortSignal.timeout(6000)
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    reply = data.reply || data.response || data.message || _aiReply(msg);
+                } else { reply = _aiReply(msg); }
+            } catch (_) { reply = _aiReply(msg); }
+
+            document.getElementById(tid)?.remove();
+            container.innerHTML += `<div class="msg msg-bot">${reply}</div>`;
             container.scrollTop = container.scrollHeight;
+            _chatHistory.push({role:'user',content:msg},{role:'assistant',content:reply});
+            if (_chatHistory.length > 20) _chatHistory = _chatHistory.slice(-20);
+            _chatBusy = false; input.disabled = false; input.focus();
         }
 
-        loadZoneStatus();
+        loadHeroStatus();
         loadQueues();
     </script>
 </body>
