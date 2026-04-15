@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>StadiumFlow – Fan Assistant</title>
+  <!-- Fix 13: preconnect before font request -->
+  <link rel="preconnect" href="https://api.fontshare.com" crossorigin />
+  <link rel="dns-prefetch" href="https://api.fontshare.com" />
+  <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700&display=swap" rel="stylesheet" />
+  <style>
+    /* ── Fix 1: Unified tokens (canonical dark values from ops.html) ── */
+    :root {
+      --font-body: 'Satoshi', sans-serif;
+      --text-xs:   clamp(0.75rem,  0.7rem  + 0.25vw, 0.875rem);
+      --text-sm:   clamp(0.875rem, 0.8rem  + 0.35vw, 1rem);
+      --text-base: clamp(1rem,     0.95rem + 0.25vw, 1.125rem);
+      --text-lg:   clamp(1.125rem, 1rem    + 0.75vw, 1.5rem);
+      --text-xl:   clamp(1.5rem,   1.2rem  + 1.25vw, 2.25rem);
+      --space-2:  0.5rem;  --space-3:  0.75rem; --space-4: 1rem;
+      --space-6:  1.5rem;  --space-8:  2rem;    --space-12: 3rem;
+      --radius-md: 0.5rem; --radius-lg: 0.75rem; --radius-xl: 1rem; --radius-full: 9999px;
+      /* Fix 2: Motion + shadow tokens */
+      --transition-fast: 120ms ease;
+      --transition-base: 180ms ease;
+      --transition-slow: 300ms ease;
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.2);
+      --shadow-lg: 0 8px 24px rgba(0,0,0,0.3);
+      --z-header: 100;
+      --z-modal:  500;
+      --z-toast:  999;
+    }
+    [data-theme="dark"] {
+      --bg: #0a0c12; --surface: #13151f; --surface-2: #1c1f2e; --border: #272a3d;
+      --text: #e2e4f0; --muted: #7c7f96;
+      --accent: #4f8ef7; --accent-hover: #3a7cf5;
+      --success: #4caf7d; --warning: #f5a623; --danger: #f45b5b;
+    }
+    [data-theme="light"] {
+      --bg: #f0f2fa; --surface: #ffffff; --surface-2: #e8ecf5; --border: #ced3e8;
+      --text: #13151f; --muted: #6b7080;
+      --accent: #2563eb; --accent-hover: #1d4ed8;
+      --success: #16a34a; --warning: #d97706; --danger: #dc2626;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: var(--font-body); background: var(--bg); color: var(--text); min-height: 100dvh; font-size: var(--text-base); }
+
+    /* Fix 14: Skip link — pure CSS, no JS */
+    .skip-link {
+      position: absolute; left: -9999px; top: auto; width: 1px; height: 1px; overflow: hidden;
+      background: var(--accent); color: #fff; padding: var(--space-3) var(--space-6);
+      border-radius: var(--radius-md); text-decoration: none; font-weight: 600; z-index: var(--z-toast);
+    }
+    .skip-link:focus { position: fixed; left: var(--space-4); top: var(--space-4); width: auto; height: auto; overflow: visible; }
+
+    /* ── Fix 4: Utility classes (replaces 20+ inline styles) ── */
+    .text-muted  { color: var(--muted); }
+    .text-sm     { font-size: var(--text-sm); }
+    .text-xs     { font-size: var(--text-xs); }
+    .page-title  { font-size: var(--text-lg); font-weight: 700; }
+    .mt-2 { margin-top: var(--space-2); } .mt-3 { margin-top: var(--space-3); } .mt-4 { margin-top: var(--space-4); }
+    .mb-2 { margin-bottom: var(--space-2); } .mb-3 { margin-bottom: var(--space-3); } .mb-4 { margin-bottom: var(--space-4); }
+
+    /* ── Layout ── */
+    header { background: var(--surface); border-bottom: 1px solid var(--border); padding: var(--space-4) var(--space-6); display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: var(--z-header); }
+    .logo { display: flex; align-items: center; gap: var(--space-3); font-weight: 700; font-size: var(--text-lg); text-decoration: none; color: var(--text); }
+    .logo svg { color: var(--accent); }
+    .header-right { display: flex; align-items: center; gap: var(--space-3); }
+    .theme-btn { background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-full); padding: var(--space-2) var(--space-3); color: var(--text); cursor: pointer; font-size: var(--text-sm); transition: var(--transition-base); }
+    .theme-btn:hover { background: var(--border); }
+    .ops-link { display: inline-flex; align-items: center; gap: 6px; padding: var(--space-2) var(--space-4); background: var(--danger); border: none; border-radius: var(--radius-full); color: #fff; font-size: var(--text-xs); font-weight: 700; text-decoration: none; letter-spacing: 0.03em; cursor: pointer; transition: opacity var(--transition-base), transform var(--transition-fast); }
+    .ops-link:hover  { opacity: 0.88; transform: translateY(-1px); }
+    .ops-link:active { transform: translateY(0); }
+    .ops-link:focus-visible { outline: 2px solid var(--danger); outline-offset: 3px; }
+    .ops-link::after { content: "→"; font-size: 0.9em; }
+
+    /* ── Fix 7: Tabs — proper ARIA, keyboard nav ── */
+    nav { display: flex; gap: 0; background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 var(--space-6); overflow-x: auto; }
+    .nav-tab { padding: var(--space-3) var(--space-4); cursor: pointer; font-size: var(--text-sm); font-weight: 500; color: var(--muted); border-bottom: 2px solid transparent; transition: all var(--transition-base); background: none; border-top: none; border-left: none; border-right: none; white-space: nowrap; }
+    .nav-tab[aria-selected="true"] { color: var(--accent); border-bottom-color: var(--accent); }
+    .nav-tab:hover { color: var(--text); }
+    .nav-tab:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+
+    main { max-width: 680px; margin: 0 auto; padding: var(--space-6) var(--space-4); }
+    .section { display: none; }
+    .section.active { display: block; }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-xl); padding: var(--space-6); margin-bottom: var(--space-4); }
+    .card h2 { font-size: var(--text-lg); margin-bottom: var(--space-4); }
+
+    /* Fix 3: oklch with rgba fallbacks */
+    .badge { display: inline-flex; align-items: center; gap: var(--space-2); padding: var(--space-2) var(--space-3); border-radius: var(--radius-full); font-size: var(--text-xs); font-weight: 600; }
+    .badge-low    { background: rgba(76,175,125,0.15); background: oklch(from var(--success) l c h / 0.15); color: var(--success); }
+    .badge-medium { background: rgba(245,166,35,0.15); background: oklch(from var(--warning) l c h / 0.15); color: var(--warning); }
+    .badge-high   { background: rgba(244,91,91,0.15);  background: oklch(from var(--danger)  l c h / 0.15); color: var(--danger); }
+
+    .btn { display: inline-flex; align-items: center; gap: var(--space-2); padding: var(--space-3) var(--space-6); border-radius: var(--radius-md); font-size: var(--text-sm); font-weight: 600; cursor: pointer; border: none; transition: all var(--transition-base); font-family: var(--font-body); }
+    .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-primary   { background: var(--accent);    color: white; }
+    .btn-primary:hover:not(:disabled) { background: var(--accent-hover); }
+    .btn-secondary { background: var(--surface-2); color: var(--text); border: 1px solid var(--border); }
+    .btn-secondary:hover:not(:disabled) { background: var(--border); }
+
+    .recommend-banner { background: rgba(79,142,247,0.1); background: oklch(from var(--accent) l c h / 0.1); border: 1px solid rgba(79,142,247,0.3); border: 1px solid oklch(from var(--accent) l c h / 0.3); border-radius: var(--radius-lg); padding: var(--space-4); margin-bottom: var(--space-4); display: flex; align-items: center; gap: var(--space-3); }
+
+    .gate-card { background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: var(--space-4); margin-bottom: var(--space-3); display: flex; justify-content: space-between; align-items: center; }
+    .gate-card.best { border-color: var(--accent); background: rgba(79,142,247,0.08); background: oklch(from var(--accent) l c h / 0.08); }
+    .gate-info h3 { font-size: var(--text-base); font-weight: 600; }
+    .gate-info p  { font-size: var(--text-sm); color: var(--muted); margin-top: 4px; }
+    .gate-score   { text-align: right; }
+    .gate-score .score { font-size: var(--text-lg); font-weight: 700; color: var(--accent); }
+    .gate-score span   { font-size: var(--text-xs); color: var(--muted); }
+
+    .queue-item { display: flex; justify-content: space-between; align-items: center; padding: var(--space-4); background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-lg); margin-bottom: var(--space-3); }
+    .queue-info h3 { font-size: var(--text-sm); font-weight: 600; }
+    .queue-info p  { font-size: var(--text-xs); color: var(--muted); }
+
+    .chat-container { display: flex; flex-direction: column; height: 420px; }
+    .chat-messages { flex: 1; overflow-y: auto; padding: var(--space-4); background: var(--surface-2); border-radius: var(--radius-lg); margin-bottom: var(--space-4); display: flex; flex-direction: column; gap: var(--space-3); }
+    .msg { max-width: 80%; padding: var(--space-3) var(--space-4); border-radius: var(--radius-lg); font-size: var(--text-sm); line-height: 1.5; }
+    .msg-bot  { background: var(--surface); border: 1px solid var(--border); align-self: flex-start; border-bottom-left-radius: 4px; }
+    .msg-user { background: var(--accent); color: white; align-self: flex-end; border-bottom-right-radius: 4px; }
+    .chat-input-row { display: flex; gap: var(--space-3); }
+    .chat-input { flex: 1; padding: var(--space-3) var(--space-4); background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); color: var(--text); font-family: var(--font-body); font-size: var(--text-sm); }
+    .chat-input:focus { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+    .loc-input-row { display: flex; gap: var(--space-3); margin-bottom: var(--space-4); flex-wrap: wrap; }
+    .loc-input { flex: 1; min-width: 120px; padding: var(--space-3); background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-md); color: var(--text); font-size: var(--text-sm); }
+    .loc-input:focus { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+    .ops-banner { background: linear-gradient(90deg, rgba(244,91,91,0.12), rgba(244,91,91,0.06)); border-bottom: 1px solid rgba(244,91,91,0.3); padding: var(--space-2) var(--space-6); display: flex; align-items: center; justify-content: space-between; font-size: var(--text-xs); color: var(--muted); }
+    .ops-banner strong { color: var(--danger); }
+
+    /* Fix 10: Skeleton loaders */
+    @keyframes shimmer { 0%{opacity:.4} 50%{opacity:.8} 100%{opacity:.4} }
+    .skeleton { background: var(--surface-2); border-radius: var(--radius-md); animation: shimmer 1.5s ease infinite; }
+    .skeleton-card { height: 60px; margin-bottom: var(--space-3); border-radius: var(--radius-lg); }
+    .skeleton-row  { height: 44px; margin-bottom: var(--space-3); border-radius: var(--radius-lg); }
+    .skeleton-line { height: 14px; margin-bottom: var(--space-2); border-radius: var(--radius-full); }
+
+    /* Fix 11: Error state */
+    .error-state { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-3); padding: var(--space-4); background: rgba(244,91,91,0.08); border: 1px solid rgba(244,91,91,0.2); border-radius: var(--radius-lg); color: var(--danger); font-size: var(--text-sm); }
+    .error-state p { margin: 0; }
+
+    @media (max-width: 480px) {
+      nav { overflow-x: auto; }
+      .loc-input-row { flex-direction: column; }
+      .ops-banner { flex-direction: column; gap: var(--space-2); text-align: center; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Fix 14: CSS-only skip link -->
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+
+  <!-- Ops banner -->
+  <div class="ops-banner" role="banner">
+    <span><strong>StadiumFlow</strong> Fan view &nbsp;&nbsp; Are you stadium staff?</span>
+    <a href="ops.html" class="ops-link" aria-label="Open Operations Dashboard">Ops Dashboard</a>
+  </div>
+
+  <header>
+    <a href="index.html" class="logo" aria-label="StadiumFlow home">
+      <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+        <circle cx="14" cy="14" r="12" stroke="currentColor" stroke-width="2"/>
+        <path d="M8 14 Q14 6 20 14 Q14 22 8 14Z" fill="currentColor" opacity="0.3"/>
+        <circle cx="14" cy="14" r="3" fill="currentColor"/>
+        <path d="M14 2 L14 6 M14 22 L14 26 M2 14 L6 14 M22 14 L26 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+      StadiumFlow
+    </a>
+    <div class="header-right">
+      <a href="ops.html" class="ops-link" aria-label="Open Ops Dashboard">Ops Dashboard</a>
+      <button class="theme-btn" onclick="toggleTheme()" aria-label="Toggle theme">Theme</button>
+    </div>
+  </header>
+
+  <!-- Fix 7: Proper ARIA tab bindings — role="tablist", id on each tab, aria-controls -->
+  <nav role="tablist" aria-label="Main navigation">
+    <button id="tab-home"   class="nav-tab" role="tab" aria-selected="true"  aria-controls="home"   onclick="showTab('home')"  >Home</button>
+    <button id="tab-gates"  class="nav-tab" role="tab" aria-selected="false" aria-controls="gates"  onclick="showTab('gates')" >Gates</button>
+    <button id="tab-queues" class="nav-tab" role="tab" aria-selected="false" aria-controls="queues" onclick="showTab('queues')">Queues</button>
+    <button id="tab-chat"   class="nav-tab" role="tab" aria-selected="false" aria-controls="chat"   onclick="showTab('chat')"  >Assistant</button>
+  </nav>
+
+  <main id="main-content">
+    <!-- Fix 7: aria-labelledby on each panel points to matching tab id -->
+    <section id="home" class="section active" role="tabpanel" tabindex="-1" aria-labelledby="tab-home">
+      <div class="card">
+        <h2>IPL 2026 – MI vs RCB</h2>
+        <p class="text-muted text-sm mb-4">Wankhede Stadium · Today 7:30 PM · Section B, Row 12, Seat 45</p>
+        <div class="recommend-banner">
+          <span style="font-size:1.5rem">🏟️</span>
+          <div>
+            <strong>Recommended: Gate 1 North</strong>
+            <p class="text-sm text-muted mt-2">6 min walk · Low congestion · Best route now</p>
+          </div>
+        </div>
+        <div style="display:flex;gap:var(--space-3);flex-wrap:wrap">
+          <button class="btn btn-primary"   onclick="showTab('gates')">Best Gate</button>
+          <button class="btn btn-secondary" onclick="showTab('queues')">Check Queues</button>
+          <button class="btn btn-secondary" onclick="showTab('chat')">Ask Assistant</button>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Live Zone Status</h2>
+        <!-- Fix 10: Skeleton loader instead of bare "Loading..." text -->
+        <div id="zone-status">
+          <div class="skeleton skeleton-row"></div>
+          <div class="skeleton skeleton-row"></div>
+          <div class="skeleton skeleton-row"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="gates" class="section" role="tabpanel" tabindex="-1" aria-labelledby="tab-gates">
+      <div class="card">
+        <h2>Best Gate Finder</h2>
+        <p class="text-muted text-sm mb-4">Enter your location to find the fastest gate</p>
+        <div class="loc-input-row">
+          <input class="loc-input" id="lat" type="number" placeholder="Latitude"  value="12.9715" step="0.0001" aria-label="Your latitude" />
+          <input class="loc-input" id="lng" type="number" placeholder="Longitude" value="77.5945" step="0.0001" aria-label="Your longitude" />
+          <button class="btn btn-primary" onclick="findBestGate()">Find Gate</button>
+        </div>
+        <!-- Fix 12: No stale hardcoded placeholder — empty until data -->
+        <div id="gate-results">
+          <div class="skeleton skeleton-card"></div>
+          <div class="skeleton skeleton-card"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="queues" class="section" role="tabpanel" tabindex="-1" aria-labelledby="tab-queues">
+      <div class="card">
+        <h2>Live Queue Status</h2>
+        <p class="text-muted text-sm mb-4">Real-time wait times from staff updates</p>
+        <div id="queue-list">
+          <div class="skeleton skeleton-row"></div>
+          <div class="skeleton skeleton-row"></div>
+          <div class="skeleton skeleton-row"></div>
+        </div>
+        <button class="btn btn-secondary mt-4" onclick="loadQueues()">Refresh</button>
+      </div>
+    </section>
+
+    <section id="chat" class="section" role="tabpanel" tabindex="-1" aria-labelledby="tab-chat">
+      <div class="card">
+        <h2>StadiumFlow Assistant</h2>
+        <div class="chat-container">
+          <div class="chat-messages" id="chat-messages" role="log" aria-live="polite" aria-label="Chat messages">
+            <div class="msg msg-bot">Hi! I'm your StadiumFlow assistant. Ask me about gates, queues, food, or navigation!</div>
+            <div class="msg msg-bot">Try <em>Which gate is least crowded?</em> or <em>Where's the shortest food queue?</em></div>
+          </div>
+          <div class="chat-input-row">
+            <input class="chat-input" id="chat-input" type="text" placeholder="Ask anything about the stadium..."
+              onkeydown="if(event.key==='Enter')sendMessage()" aria-label="Chat message input" />
+            <button class="btn btn-primary" onclick="sendMessage()" aria-label="Send message">Send</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const API = 'https://stadiumflow-api-899957858085.us-central1.run.app';
+
+    /* Fix 15: escapeHTML — prevents XSS from API data */
+    const esc = s => String(s)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+
+    /* Fix 16: Focus management — move focus to panel h2 on tab switch */
+    function showTab(name) {
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.nav-tab').forEach(t => {
+        t.classList.remove('active');
+        t.setAttribute('aria-selected', 'false');
+      });
+      const panel = document.getElementById(name);
+      panel.classList.add('active');
+      const btn = document.getElementById('tab-' + name);
+      btn.setAttribute('aria-selected', 'true');
+      // Move focus to the panel itself (tabindex="-1" set in HTML)
+      panel.focus();
+      if (name === 'queues') loadQueues();
+      if (name === 'home')   loadZoneStatus();
+    }
+
+    function toggleTheme() {
+      const html = document.documentElement;
+      html.setAttribute('data-theme', html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+    }
+
+    /* Fix 11: findBestGate with skeleton + actionable error */
+    async function findBestGate() {
+      const lat = document.getElementById('lat').value;
+      const lng = document.getElementById('lng').value;
+      const el  = document.getElementById('gate-results');
+      el.innerHTML = '<div class="skeleton skeleton-card"></div><div class="skeleton skeleton-card"></div>';
+      try {
+        const res  = await fetch(`${API}/routing?userlat=${esc(lat)}&userlng=${esc(lng)}`);
+        const data = await res.json();
+        el.innerHTML = data.map((g, i) => `
+          <div class="gate-card ${i===0?'best':''}" >
+            <div class="gate-info">
+              <h3>${i===0?'★ ':''}${esc(g.zone)}</h3>
+              <p>${esc(g.status)} &middot; ${esc(String(g.occupancypct))}% occupied</p>
+            </div>
+            <div class="gate-score">
+              <div class="score">${esc(String(g.occupancypct))}%</div>
+              <span>occupancy</span>
+            </div>
+          </div>`).join('');
+      } catch {
+        el.innerHTML = `<div class="error-state">
+          <p>⚠️ Could not load gate data.</p>
+          <button class="btn btn-secondary" onclick="findBestGate()">Try again</button>
+        </div>`;
+      }
+    }
+
+    async function loadQueues() {
+      const el = document.getElementById('queue-list');
+      if (!el) return;
+      el.innerHTML = '<div class="skeleton skeleton-row"></div><div class="skeleton skeleton-row"></div><div class="skeleton skeleton-row"></div>';
+      try {
+        const res  = await fetch(`${API}/queues`);
+        const data = await res.json();
+        if (!data.length) { el.innerHTML = '<p class="text-muted">No queue data yet.</p>'; return; }
+        el.innerHTML = data.map(q => `
+          <div class="queue-item">
+            <div class="queue-info">
+              <h3>${esc(q.zoneid || q.zone)}</h3>
+              <p>${esc(q.locationtype || 'General')}</p>
+            </div>
+            <div style="display:flex;align-items:center;gap:var(--space-3)">
+              <span class="text-sm text-muted">${esc(String(q.estimatedwaitminutes ?? q.waitminutes ?? 0))} min</span>
+              <span class="badge badge-${esc(q.queuelevel||'low')}">${esc((q.queuelevel||'low').toUpperCase())}</span>
+            </div>
+          </div>`).join('');
+      } catch {
+        el.innerHTML = `<div class="error-state">
+          <p>⚠️ Could not load queue data.</p>
+          <button class="btn btn-secondary" onclick="loadQueues()">Try again</button>
+        </div>`;
+      }
+    }
+
+    async function loadZoneStatus() {
+      const el = document.getElementById('zone-status');
+      try {
+        const res  = await fetch(`${API}/zones`);
+        const data = await res.json();
+        if (!data.length) { el.innerHTML = '<p class="text-muted">No zone data yet.</p>'; return; }
+        el.innerHTML = data.map(z => `
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:var(--space-3) 0;border-bottom:1px solid var(--border)">
+            <span class="text-sm">${esc(z.zoneid || z.zone)}</span>
+            <span class="badge badge-${z.status==='CROWDED'?'high':z.status==='MODERATE'?'medium':'low'}">${esc(z.status||'OK')}</span>
+          </div>`).join('');
+      } catch {
+        el.innerHTML = `<div class="error-state">
+          <p>⚠️ Zone data unavailable.</p>
+          <button class="btn btn-secondary" onclick="loadZoneStatus()">Try again</button>
+        </div>`;
+      }
+    }
+
+    async function sendMessage() {
+      const input = document.getElementById('chat-input');
+      const msg   = input.value.trim();
+      if (!msg) return;
+      input.value = '';
+      const container = document.getElementById('chat-messages');
+      container.innerHTML += `<div class="msg msg-user">${esc(msg)}</div>`;
+      container.innerHTML += `<div class="msg msg-bot" id="typing" aria-live="polite">Thinking…</div>`;
+      container.scrollTop = container.scrollHeight;
+      const lower = msg.toLowerCase();
+      let response;
+      try {
+        if (lower.includes('gate') || lower.includes('entry') || lower.includes('enter')) {
+          const d    = await fetch(`${API}/routing`).then(r => r.json());
+          const best = d.sort((a,b) => a.occupancypct - b.occupancypct)[0];
+          response   = `Best zone right now: <strong>${esc(best.zone)}</strong> — ${esc(best.status)}, ${esc(String(best.occupancypct))}% occupied.`;
+        } else if (lower.includes('queue') || lower.includes('wait') || lower.includes('food')) {
+          const d  = await fetch(`${API}/queues`).then(r => r.json());
+          response = d.length ? 'Queue status: ' + d.map(q => `${esc(q.zoneid||q.zone)} ${esc(String(q.estimatedwaitminutes||0))}min`).join(', ') : 'No queue updates yet.';
+        } else if (lower.includes('zone') || lower.includes('crowd')) {
+          const d  = await fetch(`${API}/zones`).then(r => r.json());
+          response = d.length ? 'Zone status: ' + d.map(z => `${esc(z.zoneid||z.zone)} ${esc(z.status||'OK')}`).join(', ') : 'No zone data available yet.';
+        } else {
+          response = 'I can help with gates, queues, and zones! Try <em>which gate is fastest?</em> or <em>check queues</em>.';
+        }
+      } catch {
+        response = 'Could not reach the backend. Please try again.';
+      }
+      document.getElementById('typing')?.remove();
+      container.innerHTML += `<div class="msg msg-bot">${response}</div>`;
+      container.scrollTop = container.scrollHeight;
+    }
+
+    loadZoneStatus();
+    loadQueues();
+  </script>
+</body>
+</html>
